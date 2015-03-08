@@ -1,2 +1,2 @@
 # visualProg
-Visual Programming project
+Visual Programming project EPFL cs-211
