@@ -49,6 +49,15 @@ void mouseDragged() {
  
 }
 
+void keyPressed (){
+  if(key == CODED) {
+    if(keyCode == LEFT) {
+      angleY += 3.7*speed;
+    } else if(keyCode == RIGHT)
+      angleY -= 3.7*speed;
+  }
+}
+
 void mouseWheel(MouseEvent event) {
  if(event.getCount() < 0) {
    if(speed <= 1.5)
