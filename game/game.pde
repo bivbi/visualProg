@@ -4,68 +4,114 @@ void setup() {
   size(1000, 1000, P3D);
   noStroke();
 }
+
+final float g = 9.81;
+final float boxThickness = 20;
+final float boxWidth = 300;
+final float boxHeight = 300;
+final float sphereRadius = 48;
+final float offset = -sphereRadius - boxThickness/2.0;
+
 float angleY = 0;
 float tiltAngleX = 0;
 float tiltAngleZ = 0;
 float maxTilt = 60;
 float speed = 1;
+PVector sphereCoordinates = new PVector(0, 0, 0);
+PVector sphereVelocity = new PVector(0, 0, 0);
 
 void draw() {
   background(200);
   fill(0);
-    text("RotationX: " + tiltAngleX, 0, 10);
-    text("RotationZ: " + tiltAngleZ, 0, 25);
-    text("Speed: " + speed, 0, 40);
+  text("RotationX: " + tiltAngleX, 0, 10);
+  text("RotationZ: " + tiltAngleZ, 0, 25);
+  text("Speed: " + speed, 0, 40);
   fill(#B404A9);
   lights();
   translate(width/2, height/2, 0);
   rotateY((float) toRadians(angleY));
   rotateX((float) toRadians(tiltAngleX));
   rotateZ((float) toRadians(tiltAngleZ));
-  box(500,20,500);
+  box(boxWidth, boxThickness, boxHeight);
+  updateSphereCoordinates();
+  translate(sphereCoordinates.x, sphereCoordinates.y + offset, sphereCoordinates.z);
+  fill(#1D10E0);
+  sphere(sphereRadius);
+}
 
+void updateSphereCoordinates() {
+  float gravForceX = sin(tiltAngleZ) * g;
+  float gravForceZ = sin(tiltAngleX) * g;
+  float normalForce = 1;
+  float mu = 0.01;
+  float frictionMagnitude = normalForce * mu;
+  PVector friction = sphereVelocity.get();
+  friction.mult(-1);
+  friction.normalize();
+  friction.mult(frictionMagnitude);
+  float finalX = gravForceX + friction.x;
+  float finalY = friction.y;
+  float finalZ = gravForceZ + friction.z;
+  sphereVelocity.set(finalX, finalY, finalZ);
+  sphereCoordinates.add(sphereVelocity);
+  sphereCheckEdges();
+}
+
+void sphereCheckEdges() {
+  if(sphereCoordinates.x > + boxWidth/2) {
+     sphereVelocity.x *= -1;
+     sphereCoordinates.x = boxWidth/2;
+  } else if (sphereCoordinates.x < -boxWidth/2) {
+     sphereVelocity.x *= -1;
+     sphereCoordinates.x = -boxWidth/2;
+  }
+  if(sphereCoordinates.z > boxHeight/2) {
+     sphereVelocity.z *= -1;
+     sphereCoordinates.z = boxHeight/2;
+  } else if (sphereCoordinates.z < -boxWidth/2) {
+     sphereVelocity.z *= -1;
+     sphereCoordinates.z = -boxWidth/2;
+  }
 }
 
 void mouseDragged() {
   if (pmouseY < mouseY) {
-    if(tiltAngleX > -maxTilt)
+    if (tiltAngleX > -maxTilt)
       tiltAngleX -= 3.7*speed;
   } else if (pmouseY > mouseY) {
-    if(tiltAngleX < +maxTilt)
+    if (tiltAngleX < +maxTilt)
       tiltAngleX += 3.7*speed;
   }
-  
+
   if (pmouseX < mouseX) {
-    if(tiltAngleZ < maxTilt)
+    if (tiltAngleZ < maxTilt)
       tiltAngleZ += 3.7*speed;
   } else if (pmouseX > mouseX) {
-    if(tiltAngleZ > -maxTilt)
+    if (tiltAngleZ > -maxTilt)
       tiltAngleZ -= 3.7*speed;
   }
- if(tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
- if(tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
- if(tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
- if(tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
- 
+  if (tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
+  if (tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
+  if (tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
+  if (tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
 }
 
-void keyPressed (){
-  if(key == CODED) {
-    if(keyCode == LEFT) {
+void keyPressed () {
+  if (key == CODED) {
+    if (keyCode == LEFT) {
       angleY += 3.7*speed;
-    } else if(keyCode == RIGHT)
+    } else if (keyCode == RIGHT)
       angleY -= 3.7*speed;
   }
 }
 
 void mouseWheel(MouseEvent event) {
- if(event.getCount() < 0) {
-   if(speed <= 1.5)
-     speed += 0.1;
- } else {
-   if(speed >= 0.2)
-     speed -= 0.1;
- }
+  if (event.getCount() < 0) {
+    if (speed <= 1.5)
+      speed += 0.1;
+  } else {
+    if (speed >= 0.2)
+      speed -= 0.1;
+  }
 }
-
 

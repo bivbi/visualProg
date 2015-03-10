@@ -1,9 +1,9 @@
 class Mover {
   PVector location;
   PVector velocity;
-  float g = 0.981;
+  final float g = 0.42;
   PVector gravity = new PVector(0,g);
-  
+
   Mover() {
     location = new PVector(width/2, height/2);
     velocity = new PVector(1,1);
@@ -32,7 +32,7 @@ class Mover {
     } else if (location.y < 0) {
       velocity.set(velocity.x,velocity.y*(-1));
     }
-    
+
     velocity.add(gravity);
     
     if(location.y >= height) location.set(location.x, height);
