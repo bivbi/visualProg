@@ -1,28 +1,57 @@
 void setup() {
   size (1000,1000,P2D);
 }
+ 
+ float scaleRate = 1;
+ float angleX = 0;
+ float angleY = 0;
   
+ ///// VIEW /////
+ 
 void draw() {
   background(255,255,255);
   My3DPoint eye = new My3DPoint(0, 0, -5000);
   My3DPoint origin = new My3DPoint(0, 0, 0);
   My3DBox input3DBox = new My3DBox(origin, 100, 150, 300);
- 
-  //rotated around x
-  float[][] transform1 = rotateXMatrix(PI/8);
-  input3DBox = transformBox(input3DBox, transform1);
-  projectBox(eye, input3DBox).render();
- 
-  //rotated and translated
-  float[][] transform2 = translationMatrix(200,200,0);
-  input3DBox = transformBox(input3DBox, transform2);
-  projectBox(eye, input3DBox).render();
- 
-  //rotated, translated and scaled
-  float[][] transform3 = scaleMatrix(2,2,2);
-  input3DBox = transformBox(input3DBox, transform3);
+  
+  float[][] translate = translationMatrix(mouseX, mouseY, 1);
+  float[][] scale = scaleMatrix(scaleRate, scaleRate, scaleRate);
+  float[][] rotateX = rotateXMatrix(angleX);
+  float[][] rotateY = rotateYMatrix(angleY);
+  
+  input3DBox = transformBox(input3DBox, scale);
+  input3DBox = transformBox(input3DBox, rotateX);
+  input3DBox = transformBox(input3DBox, rotateY);
+  input3DBox = transformBox(input3DBox, translate);
+
   projectBox(eye, input3DBox).render();
 }
+
+///// CONTROLLER /////
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  println(e);
+  if (e >= 0) {
+    scaleRate -= 0.02;
+  } else {
+    scaleRate += 0.02;
+  } 
+}
+
+void keyPressed() {
+  if (keyCode == UP) {
+    angleX -= 0.02;
+  } else if (keyCode == DOWN) {
+    angleX += 0.02;
+  } else if (keyCode == RIGHT) {
+    angleY += 0.02;
+  } else if (keyCode == LEFT) {
+    angleY -= 0.02;
+  }
+}
+
+///// MODEL /////
  
 class My2DPoint {
   float x;
@@ -50,7 +79,6 @@ My2DPoint projectPoint(My3DPoint eye, My3DPoint p) {
   float[] this3DPoint = {p.x, p.y, p.z, 1};
   float[] projectedPoint = matrixProduct(PT, this3DPoint);
   
-  // Il faut normaliser le résultat --> multiplication par ez/(ez - z)
   return new My2DPoint(projectedPoint[0]*(eye.z/(eye.z -p.z)), projectedPoint[1]*(eye.z/(eye.z -p.z)));
   //return new My2DPoint((p.x*eye.z - eye.x*eye.z)/(eye.z - p.z), (p.y*eye.z - eye.y*eye.z)/(eye.z - p.z));
 }
