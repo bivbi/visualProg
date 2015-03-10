@@ -1,7 +1,7 @@
 Mover mover;
 
 void setup() {
-   size(800,200);
+   size(200,500);
    mover = new Mover();
    frameRate(60);
 }
