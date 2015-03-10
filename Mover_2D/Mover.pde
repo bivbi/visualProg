@@ -1,11 +1,12 @@
 class Mover {
   PVector location;
   PVector velocity;
-  PVector gravity = new PVector(0,3);
+  float g = 0.981;
+  PVector gravity = new PVector(0,g);
   
   Mover() {
     location = new PVector(width/2, height/2);
-    velocity = new PVector(0,3);
+    velocity = new PVector(1,1);
   }
   
   void update() {
