@@ -29,19 +29,24 @@ void draw() {
 void mouseDragged() {
   if (pmouseY < mouseY) {
     if(tiltAngleX > -maxTilt)
-      tiltAngleX -= 5*speed;
+      tiltAngleX -= 3.7*speed;
   } else if (pmouseY > mouseY) {
     if(tiltAngleX < +maxTilt)
-      tiltAngleX += 5*speed;
+      tiltAngleX += 3.7*speed;
   }
   
   if (pmouseX < mouseX) {
-    if(tiltAngleZ > -maxTilt)
-      tiltAngleZ += 5*speed;
+    if(tiltAngleZ < maxTilt)
+      tiltAngleZ += 3.7*speed;
   } else if (pmouseX > mouseX) {
-    if(tiltAngleZ < +maxTilt)
-      tiltAngleZ -= 5*speed;
-  }  
+    if(tiltAngleZ > -maxTilt)
+      tiltAngleZ -= 3.7*speed;
+  }
+ if(tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
+ if(tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
+ if(tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
+ if(tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
+ 
 }
 
 void mouseWheel(MouseEvent event) {
