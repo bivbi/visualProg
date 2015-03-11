@@ -11,6 +11,9 @@ final float boxWidth = 300;
 final float boxHeight = 300;
 final float sphereRadius = 48;
 final float offset = -sphereRadius - boxThickness/2.0;
+final PVector invX = new PVector(-1, 1, 1);
+final PVector invY = new PVector(1, -1, 1);
+final PVector invZ = new PVector(1, 1, -1);
 
 float angleY = 0;
 float tiltAngleX = 0;
@@ -19,13 +22,14 @@ float maxTilt = 60;
 float speed = 1;
 PVector sphereCoordinates = new PVector(0, 0, 0);
 PVector sphereVelocity = new PVector(0, 0, 0);
+PVector gravityForce = new PVector(0, 0, 0);
 
 void draw() {
   background(200);
   fill(0);
-  text("RotationX: " + tiltAngleX, 0, 10);
-  text("RotationZ: " + tiltAngleZ, 0, 25);
-  text("Speed: " + speed, 0, 40);
+  text("RotationX: " + tiltAngleX, 5, 10);
+  text("RotationZ: " + tiltAngleZ, 5, 25);
+  text("Speed: " + speed, 5, 40);
   fill(#B404A9);
   lights();
   translate(width/2, height/2, 0);
@@ -40,37 +44,41 @@ void draw() {
 }
 
 void updateSphereCoordinates() {
-  float gravForceX = sin(tiltAngleZ) * g;
-  float gravForceZ = sin(tiltAngleX) * g;
+  gravityForce.x = sin(tiltAngleZ) * g;
+  gravityForce.z = sin(tiltAngleX) * g;
+  
   float normalForce = 1;
   float mu = 0.01;
   float frictionMagnitude = normalForce * mu;
+  
   PVector friction = sphereVelocity.get();
   friction.mult(-1);
   friction.normalize();
   friction.mult(frictionMagnitude);
-  float finalX = gravForceX + friction.x;
-  float finalY = friction.y;
-  float finalZ = gravForceZ + friction.z;
-  sphereVelocity.set(finalX, finalY, finalZ);
+  
+  PVector results = new PVector();
+  results.add(friction);
+  results.add(gravityForce);
+  
+  sphereVelocity.set(results);
   sphereCoordinates.add(sphereVelocity);
   sphereCheckEdges();
 }
 
 void sphereCheckEdges() {
-  if(sphereCoordinates.x > + boxWidth/2) {
-     sphereVelocity.x *= -1;
-     sphereCoordinates.x = boxWidth/2;
+  if (sphereCoordinates.x > + boxWidth/2) {
+    sphereVelocity.x *= -1;
+    sphereCoordinates.x = boxWidth/2;
   } else if (sphereCoordinates.x < -boxWidth/2) {
-     sphereVelocity.x *= -1;
-     sphereCoordinates.x = -boxWidth/2;
+    sphereVelocity.x *= -1;
+    sphereCoordinates.x = -boxWidth/2;
   }
-  if(sphereCoordinates.z > boxHeight/2) {
-     sphereVelocity.z *= -1;
-     sphereCoordinates.z = boxHeight/2;
+  if (sphereCoordinates.z > boxHeight/2) {
+    sphereVelocity.z *= -1;
+    sphereCoordinates.z = boxHeight/2;
   } else if (sphereCoordinates.z < -boxWidth/2) {
-     sphereVelocity.z *= -1;
-     sphereCoordinates.z = -boxWidth/2;
+    sphereVelocity.z *= -1;
+    sphereCoordinates.z = -boxWidth/2;
   }
 }
 
@@ -82,7 +90,6 @@ void mouseDragged() {
     if (tiltAngleX < +maxTilt)
       tiltAngleX += 3.7*speed;
   }
-
   if (pmouseX < mouseX) {
     if (tiltAngleZ < maxTilt)
       tiltAngleZ += 3.7*speed;
