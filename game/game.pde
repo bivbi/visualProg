@@ -5,7 +5,7 @@ void setup() {
   frameRate(60);
   noStroke();
 }
-final float timeFactor = 60.0;
+final float timeFactor = 1.0 / 60.0;
 final float elasticity = 0.9;
 final float g = 9.81;
 final float boxThickness = 20;
@@ -45,15 +45,15 @@ void draw() {
 }
 
 void updateSphereCoordinates() {
-  gravityForce.x = sin(tiltAngleZ) * g / timeFactor;
-  gravityForce.z = sin(tiltAngleX) * g / timeFactor;
+  gravityForce.x = sin((float)toRadians(tiltAngleZ)) * g * timeFactor;
+  gravityForce.z = -sin((float)toRadians(tiltAngleX)) * g * timeFactor;
   
   float normalForce = 1;
   float mu= 0.01;
   float frictionMagnitude = normalForce * mu;
   PVector friction = sphereVelocity.get();
   friction.normalize();
-  friction.mult(frictionMagnitude / timeFactor);
+  friction.mult(frictionMagnitude * timeFactor);
   
   sphereVelocity.add(gravityForce);
   sphereVelocity.add(friction);
@@ -77,11 +77,12 @@ void sphereCheckEdges() {
   }
   if (sphereCoordinates.z > boxHeight/2) { // touch down
     if(sphereVelocity.z > 0) {
-      sphereVelocity.x *= -0.5;
-    }    sphereCoordinates.z = boxHeight/2;
-  } else if (sphereCoordinates.z < -boxWidth/2) { // touch up
+      sphereVelocity.z *= -0.5;
+    }    
+    sphereCoordinates.z = boxHeight/2;
+  } else if (sphereCoordinates.z < -boxHeight/2) { // touch up
     if(sphereVelocity.z < 0) {
-      sphereVelocity.x *= -0.5;
+      sphereVelocity.z *= -0.5;
     }
     sphereCoordinates.z = -boxWidth/2;
   }
@@ -110,9 +111,9 @@ void mouseDragged() {
 
 void keyPressed () {
   if (key == CODED) {
-    if (keyCode == LEFT) {
+    if (keyCode == LEFT)
       angleY += 3.7*speed;
-    } else if (keyCode == RIGHT)
+    if (keyCode == RIGHT)
       angleY -= 3.7*speed;
   }
 }
