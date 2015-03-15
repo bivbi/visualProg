@@ -14,7 +14,7 @@ void draw() {
   My3DPoint origin = new My3DPoint(0, 0, 0);
   My3DBox input3DBox = new My3DBox(origin, 100, 150, 300);
   
-  float[][] translate = translationMatrix(mouseX, mouseY, 1);
+  float[][] translate = translationMatrix(width/2, height/2, 1);
   float[][] scale = scaleMatrix(scaleRate, scaleRate, scaleRate);
   float[][] rotateX = rotateXMatrix(angleX);
   float[][] rotateY = rotateYMatrix(angleY);
