@@ -54,17 +54,17 @@ class Sphere {
 
   private void edgeCollision() {
     if (coordinates.x - sphereRadius < -boxWidth/2) {
-      velocity.x *= -elasticity;
+      computeCollision(new PVector(-boxWidth/2 + sphereRadius, coordinates.y));
       coordinates.x = -boxWidth/2 + sphereRadius;
     } else if (coordinates.x + sphereRadius > boxWidth/2) {
-      velocity.x *= -elasticity;
+      computeCollision(new PVector(boxWidth/2 - sphereRadius, coordinates.y));
       coordinates.x = boxWidth/2 - sphereRadius;
     } 
     if (coordinates.y - sphereRadius < -boxHeight/2) {
-      velocity.y *= -elasticity;
+      computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius));
       coordinates.y = -boxHeight/2 + sphereRadius;
     } else if (coordinates.y + sphereRadius > boxHeight/2) {
-      velocity.y *= -elasticity;
+      computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius));
       coordinates.y = boxHeight/2 - sphereRadius;
     }
   }
@@ -79,18 +79,22 @@ class Sphere {
       }
     }
     if (collisionHappens) {
-      PVector n = cylinder.coordinates.get();
-      n.sub(coordinates);
-      n.normalize();
-      float c = n.x*velocity.x + n.y*velocity.y;
-      PVector V1NN = n.get();
-      V1NN.mult(2);
-      V1NN.mult(c);
-      PVector v2 = velocity.get();
-      v2.sub(V1NN);
-      velocity.set(v2);
+      computeCollision(cylinder.coordinates);
       cylinders.remove(cylinder);
     }
+  }
+
+  private void computeCollision(PVector coords) {
+    PVector n = coords.get();
+    n.sub(coordinates);
+    n.normalize();
+    float c = n.x*velocity.x + n.y*velocity.y;
+    PVector V1NN = n.get();
+    V1NN.mult(2);
+    V1NN.mult(c);
+    PVector v2 = velocity.get();
+    v2.sub(V1NN);
+    velocity.set(v2);
   }
 
   private boolean collisionHappens(float cx, float cy) {

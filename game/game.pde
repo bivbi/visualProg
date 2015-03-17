@@ -50,13 +50,13 @@ float tiltAngleX = 0.0;
 float tiltAngleZ = 0.0;
 Mover mover = new Mover();
 boolean addingCylinderMode = false;
+boolean ignoreYRotation    = true;
 
 ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
 
 void setup() {
   size(1000, 1000, P3D);
   frameRate(fps);
-  noStroke();
 
   float angle;
   float[] x = new float[cylinderResolution +1];
@@ -96,6 +96,7 @@ void setup() {
     bottomCylinder.vertex(0, cylinderHeight, 0);
   }
   bottomCylinder.endShape();
+  noStroke();
 }
 
 void draw() {
@@ -104,7 +105,11 @@ void draw() {
 
   //Information in upper left corner
   text("RotationX: "         + tiltAngleX, 5, 10);
-  text("RotationY: "         +     angleY, 5, 25);
+  if (ignoreYRotation) {
+    text("RotationY: DISABLED", 5, 25);
+  } else {
+    text("RotationY: "         +     angleY, 5, 25);
+  }
   text("RotationZ: "         + tiltAngleZ, 5, 40);
   text("Speed: "             + speed, 5, 55);
   text("sphereCoordinates: " + mover.sphere.coordinates, 5, 70);
@@ -153,19 +158,22 @@ void mouseDragged() {
 //Rotation along Y
 void keyPressed () {
   if (key == CODED) {
-    if (keyCode == LEFT && !addingCylinderMode)
+    if (keyCode == LEFT && !addingCylinderMode && !ignoreYRotation)
       angleY -= speedFactor*speed;
-    if (keyCode == RIGHT && !addingCylinderMode)
+    if (keyCode == RIGHT && !addingCylinderMode && !ignoreYRotation)
       angleY += speedFactor*speed;
     if (keyCode == SHIFT)
       addingCylinderMode = true;
+  } else {
+    if (key == 'y') {
+      ignoreYRotation = !ignoreYRotation;
+    }
   }
-  
-  if(angleY >= 360)
+
+  if (angleY >= 360)
     angleY -= 360;
-  if(angleY < 0)
+  if (angleY < 0)
     angleY += 360;
-  
 }
 
 //Rotation speed increase or decrease with mouseWheel
@@ -197,7 +205,9 @@ void mouseClicked() {
 
 void placeBoxAndSphere() {
   if (!addingCylinderMode) {
-    rotateY((float) toRadians(angleY));     //Rotation along Y
+    if (!ignoreYRotation) {
+      rotateY((float) toRadians(angleY));     //Rotation along Y
+    }
     rotateX((float) toRadians(tiltAngleX)); //Rotation along X
     rotateZ((float) toRadians(tiltAngleZ)); //Rotation along Z
   } else {
@@ -228,7 +238,7 @@ void cursorCylinder() {
     cursor();
 
   Cylinder cylinder = new Cylinder(coords.x, coords.y);
-  cylinder.display();
+  cylinder.display(true);
   popMatrix();
 }
 
@@ -237,7 +247,7 @@ void placeCylinders() {
     pushMatrix();
     translate(0, cylinderOffset);
     rotateX(HALF_PI);
-    c.display();
+    c.display(false);
     popMatrix();
   }
 }
