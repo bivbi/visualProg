@@ -48,7 +48,7 @@ float speed      = 1.0;
 float angleY     = 0.0;
 float tiltAngleX = 0.0;
 float tiltAngleZ = 0.0;
-Sphere sphere = new Sphere();
+Mover mover = new Mover();
 boolean addingCylinderMode = false;
 
 ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
@@ -106,8 +106,8 @@ void draw() {
   text("RotationX: "         + tiltAngleX, 5, 10);
   text("RotationZ: "         + tiltAngleZ, 5, 25);
   text("Speed: "             + speed, 5, 40);
-  text("sphereCoordinates: " + sphere.coordinates, 5, 55);
-  text("SphereVelocity: "    + sphere.velocity, 5, 70);
+  text("sphereCoordinates: " + mover.sphere.coordinates, 5, 55);
+  text("SphereVelocity: "    + mover.sphere.velocity, 5, 70);
 
   lights();
 
@@ -178,9 +178,8 @@ void keyReleased() {
 }
 
 void mouseClicked() {
-  if (addingCylinderMode && cylinderCheckEdges()) {
-    cylinders.add(new Cylinder(mouseX-width/2, mouseY-height/2));
-  }
+  PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
+  cylinders.add(new Cylinder(coords.x, coords.y));
 }
 
 void placeBoxAndSphere() {
@@ -194,10 +193,10 @@ void placeBoxAndSphere() {
   fill(boxColor);
   box(boxWidth, boxThickness, boxHeight); //Creation of the box
   pushMatrix();
-  sphere.updateCoordinates();
+  mover.update();
   translate(0, sphereOffset, 0);
   rotateX(HALF_PI);
-  sphere.display(addingCylinderMode);
+  mover.display();
   popMatrix();
 }
 
@@ -205,16 +204,17 @@ void cursorCylinder() {
   pushMatrix();
   translate(0, cylinderOffset, 0);
   rotateX(HALF_PI);
+  PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
   float x = clamp(mouseX-width/2, -boxWidth/2, boxWidth/2);
-  
-  float y = clamp(mouseY-height/2,-boxHeight/2,boxHeight/2);
-  
-  if(mouseX-width/2 == x && mouseY-height/2 == y)
+
+  float y = clamp(mouseY-height/2, -boxHeight/2, boxHeight/2);
+
+  if (mouseX-width/2 == coords.x && mouseY-height/2 == coords.y)
     noCursor();
   else
     cursor();
-  
-  Cylinder cylinder = new Cylinder(x, y);
+
+  Cylinder cylinder = new Cylinder(coords.x, coords.y);
   cylinder.display();
   popMatrix();
 }
@@ -242,11 +242,18 @@ private static float clamp(float x, float min, float max) {
 }
 
 
-private boolean cylinderCheckEdges() {
-  float widthOffset = (width - boxWidth) / 2.0;
-  float heightOffset = (height - boxHeight) / 2.0;
-  boolean xEdges = (widthOffset + cylinderBaseSize) <= mouseX && mouseX <= (width - widthOffset - cylinderBaseSize);
-  boolean yEdges = (heightOffset + cylinderBaseSize) <= mouseY && mouseY <= (height - heightOffset- cylinderBaseSize);
-  return  xEdges && yEdges;
+private PVector cylinderCheckEdges(float x, float y) {
+  float x2 = x, y2 = y;
+  if (x < -boxWidth/2 - sphereRadius) {
+    x2 = -boxWidth/2 - sphereRadius +1;
+  } else if (x > boxWidth/2 + sphereRadius) {
+    x2 = boxWidth/2 + sphereRadius -1;
+  }
+  if (y < -boxHeight/2 - sphereRadius) {
+    y2 = -boxHeight/2 - sphereRadius +1;
+  } else if (y > boxHeight/2 + sphereRadius) {
+    y2 = boxHeight/2 + sphereRadius -1;
+  }
+  return new PVector(x2, y2);
 }
 

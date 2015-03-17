@@ -19,11 +19,9 @@ class Sphere {
     velocity.y = vy;
   }
 
-  void display(boolean addingCylinderMode) {
+  void display() {
     pushMatrix();
-    if (!addingCylinderMode) {
-      translate(coordinates.x, coordinates.y);
-    }
+    translate(coordinates.x, coordinates.y);
     fill(sphereColor);
     sphere(sphereRadius);
     popMatrix();
@@ -41,11 +39,65 @@ class Sphere {
     friction.normalize();
     friction.mult(frictionMagnitude * timeFactor); //Friction factor
 
-    velocity.add(gravityForce); //Change velocity according to gravity
+      velocity.add(gravityForce); //Change velocity according to gravity
     velocity.add(friction);     //Change velocity according to friction
 
 
-    coordinates.add(sphere.velocity); //Change the coordinates according to the velocity
+      coordinates.add(velocity); //Change the coordinates according to the velocity
+  }
+
+
+  void checkCollisions() {
+    edgeCollision();
+    cylindersCollision();
+  }
+
+  private void edgeCollision() {
+    if (coordinates.x - sphereRadius < -boxWidth/2) {
+      velocity.x *= -elasticity;
+      coordinates.x = -boxWidth/2 + sphereRadius;
+    } else if (coordinates.x + sphereRadius > boxWidth/2) {
+      velocity.x *= -elasticity;
+      coordinates.x = boxWidth/2 - sphereRadius;
+    } 
+    if (coordinates.y - sphereRadius < -boxHeight/2) {
+      velocity.y *= -elasticity;
+      coordinates.y = -boxHeight/2 + sphereRadius;
+    } else if (coordinates.y + sphereRadius > boxHeight/2) {
+      velocity.y *= -elasticity;
+      coordinates.y = boxHeight/2 - sphereRadius;
+    }
+  }
+
+  private void cylindersCollision() {
+    Cylinder cylinder = new Cylinder(0,0);
+    boolean collisionHappens = false;
+    for (Cylinder c : cylinders) {
+      if (collisionHappens(c.coordinates.x, c.coordinates.y) && !collisionHappens) {
+        collisionHappens = true;
+        cylinder = c;
+      }
+    }
+    if (collisionHappens) {
+      PVector n = cylinder.coordinates.get();
+      n.sub(coordinates);
+      n.normalize();
+      PVector V1N = velocity.get();
+      V1N.dot(n);
+      V1N.cross(n);
+      V1N.mult(2);
+      PVector v2 = velocity.get();
+      v2.sub(V1N);
+      velocity.set(v2);
+      cylinders.remove(cylinder);
+    }
+  }
+
+  private boolean collisionHappens(float cx, float cy) {
+    if ((coordinates.x + sphereRadius >= cx - cylinderBaseSize) && (coordinates.x <= cx + cylinderBaseSize))
+      return (coordinates.y + sphereRadius >= cy - cylinderBaseSize) && (coordinates.y <= cy + cylinderBaseSize);
+    else
+      return false;
   }
 }
 
