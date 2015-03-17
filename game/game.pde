@@ -48,12 +48,11 @@ float speed      = 1.0;
 float angleY     = 0.0;
 float tiltAngleX = 0.0;
 float tiltAngleZ = 0.0;
-PVector sphereCoordinates  = new PVector(0, 0, 0);
-PVector sphereVelocity     = new PVector(0, 0, 0);
-PVector gravityForce       = new PVector(0, 0, 0);
+Sphere sphere = new Sphere();
 boolean addingCylinderMode = false;
 
-ArrayList<PVector> cylinders = new ArrayList<PVector>();
+ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
+
 void setup() {
   size(1000, 1000, P3D);
   frameRate(fps);
@@ -107,8 +106,8 @@ void draw() {
   text("RotationX: "         + tiltAngleX, 5, 10);
   text("RotationZ: "         + tiltAngleZ, 5, 25);
   text("Speed: "             + speed, 5, 40);
-  text("sphereCoordinates: " + sphereCoordinates, 5, 55);
-  text("SphereVelocity: "    + sphereVelocity, 5, 70);
+  text("sphereCoordinates: " + sphere.coordinates, 5, 55);
+  text("SphereVelocity: "    + sphere.velocity, 5, 70);
 
   lights();
 
@@ -119,50 +118,6 @@ void draw() {
   else
     cursor();
   placeCylinders();
-}
-
-void updateSphereCoordinates() {
-  gravityForce.x = +sin((float)toRadians(tiltAngleZ)) * g * timeFactor; //Gravity force on X
-  gravityForce.z = -sin((float)toRadians(tiltAngleX)) * g * timeFactor; //Gravity force on Z
-
-  float normalForce = 1.0;
-  float mu= 0.01;
-  float frictionMagnitude = normalForce * mu;
-  PVector friction = sphereVelocity.get();
-  friction.normalize();
-  friction.mult(frictionMagnitude * timeFactor); //Friction factor
-
-    sphereVelocity.add(gravityForce); //Change velocity according to gravity
-  sphereVelocity.add(friction);     //Change velocity according to friction
-
-
-    sphereCoordinates.add(sphereVelocity); //Change the coordinates according to the velocity
-  sphereCheckEdges();                    //Check if the sphere is touching the edges of the box
-}
-
-void sphereCheckEdges() {
-  if (sphereCoordinates.x > boxWidth/2) {           //Touch right
-    if (sphereVelocity.x > 0) {
-      sphereVelocity.x *= -elasticity;
-    }
-    sphereCoordinates.x = boxWidth/2;
-  } else if (sphereCoordinates.x < -boxWidth/2) {   //Touch left
-    if (sphereVelocity.x < 0) {
-      sphereVelocity.x *= -elasticity;
-    }
-    sphereCoordinates.x = -boxWidth/2;
-  }
-  if (sphereCoordinates.z > boxHeight/2) {          //Touch down
-    if (sphereVelocity.z > 0) {
-      sphereVelocity.z *= -elasticity;
-    }    
-    sphereCoordinates.z = boxHeight/2;
-  } else if (sphereCoordinates.z < -boxHeight/2) {  //Touch up
-    if (sphereVelocity.z < 0) {
-      sphereVelocity.z *= -elasticity;
-    }
-    sphereCoordinates.z = -boxWidth/2;
-  }
 }
 
 void mouseDragged() {
@@ -224,10 +179,9 @@ void keyReleased() {
 
 void mouseClicked() {
   if (addingCylinderMode && cylinderCheckEdges()) {
-    cylinders.add(new PVector(mouseX-width/2, cylinderOffset, mouseY-height/2));
+    cylinders.add(new Cylinder(mouseX-width/2, mouseY-height/2));
   }
 }
-
 
 void placeBoxAndSphere() {
   if (!addingCylinderMode) {
@@ -239,36 +193,32 @@ void placeBoxAndSphere() {
   }
   fill(boxColor);
   box(boxWidth, boxThickness, boxHeight); //Creation of the box
-  if (!addingCylinderMode)
-    updateSphereCoordinates();              //Compute the new sphere coordinates
   pushMatrix();
-  translate(sphereCoordinates.x, sphereCoordinates.y + sphereOffset, sphereCoordinates.z); //Set the origin for the sphere in the box referencial
-  fill(sphereColor);
-  sphere(sphereRadius);                   //Creation of the sphere
+  sphere.updateCoordinates(-boxWidth/2, boxWidth/2, -boxHeight/2, boxHeight/2);
+  translate(0,sphereOffset,0);
+  rotateX(HALF_PI);
+  sphere.display(addingCylinderMode);
   popMatrix();
-}
-
-void cylinder() {
-  shape(openCylinder);
-  shape(topCylinder);
-  shape(bottomCylinder);
 }
 
 void cursorCylinder() {
   noCursor();
+  pushMatrix();
+  translate(0, cylinderOffset, 0);
+  rotateX(HALF_PI);
   float x = mouseX-width/2;
   float y = mouseY-height/2;
-  pushMatrix();
-  translate(x, cylinderOffset, y);
-  cylinder();
+  Cylinder cylinder = new Cylinder(x,y);
+  cylinder.display();
   popMatrix();
 }
 
 void placeCylinders() {
-  for (PVector v : cylinders) {
+  for (Cylinder c : cylinders) {
     pushMatrix();
-    translate(v.x, v.y, v.z);
-    cylinder();
+    translate(0, cylinderOffset);
+    rotateX(HALF_PI);
+    c.display();
     popMatrix();
   }
 }
@@ -281,10 +231,11 @@ private static int clamp(int x, int min, int max) {
   else return x;
 }
 
+
 private boolean cylinderCheckEdges() {
  float widthOffset = (width - boxWidth) / 2.0;
  float heightOffset = (height - boxHeight) / 2.0;
  boolean xEdges = (widthOffset + cylinderBaseSize) <= mouseX && mouseX <= (width - widthOffset - cylinderBaseSize);
  boolean yEdges = (heightOffset + cylinderBaseSize) <= mouseY && mouseY <= (height - heightOffset- cylinderBaseSize);
- return xEdges && yEdges;
+ return  xEdges && yEdges;
 }
