@@ -82,17 +82,12 @@ class Sphere {
       PVector n = cylinder.coordinates.get();
       n.sub(coordinates);
       n.normalize();
-      println("n: " + n);
       float c = n.x*velocity.x + n.y*velocity.y;
-      println("c: "+c);
       PVector V1NN = n.get();
       V1NN.mult(2);
       V1NN.mult(c);
-      println("2(v1.n)n: " + V1NN);
-      println("V1: "+velocity);
       PVector v2 = velocity.get();
       v2.sub(V1NN);
-      print("new velocity: " + v2); println(" - old velocity: " + velocity);
       velocity.set(v2);
       cylinders.remove(cylinder);
     }
