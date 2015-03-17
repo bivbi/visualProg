@@ -29,7 +29,7 @@ class Sphere {
     popMatrix();
   }
 
-  void updateCoordinates(float minWidth, float maxWidth, float minHeight, float maxHeight) {
+  void updateCoordinates() {
     PVector gravityForce = new PVector(0, 0);
     gravityForce.x       = +sin((float)toRadians(tiltAngleZ)) * g * timeFactor; //Gravity force on X
     gravityForce.y       = -sin((float)toRadians(tiltAngleX)) * g * timeFactor; //Gravity force on Z
@@ -46,25 +46,6 @@ class Sphere {
 
 
     coordinates.add(sphere.velocity); //Change the coordinates according to the velocity
-    checkEdges(minWidth, maxWidth, minHeight, maxHeight);                    //Check if the sphere is touching the edges of the box
-  }
-
-
-  void checkEdges(float minWidth, float maxWidth, float minHeight, float maxHeight) {
-    if (coordinates.x >= maxWidth) {           //Touch right
-        velocity.x *= -elasticity;
-      coordinates.x = maxWidth;
-    } else if (coordinates.x <= minWidth) {   //Touch left
-        velocity.x *= -elasticity;
-      coordinates.x = minWidth;
-    }
-    if (coordinates.y >= maxHeight) {          //Touch down
-        velocity.y *= -elasticity;
-      coordinates.y = maxHeight;
-    } else if (coordinates.y <= minHeight) {  //Touch up
-        velocity.y *= -elasticity;
-      coordinates.y = minHeight;
-    }
   }
 }
 

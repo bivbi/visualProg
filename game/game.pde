@@ -194,21 +194,27 @@ void placeBoxAndSphere() {
   fill(boxColor);
   box(boxWidth, boxThickness, boxHeight); //Creation of the box
   pushMatrix();
-  sphere.updateCoordinates(-boxWidth/2, boxWidth/2, -boxHeight/2, boxHeight/2);
-  translate(0,sphereOffset,0);
+  sphere.updateCoordinates();
+  translate(0, sphereOffset, 0);
   rotateX(HALF_PI);
   sphere.display(addingCylinderMode);
   popMatrix();
 }
 
 void cursorCylinder() {
-  noCursor();
   pushMatrix();
   translate(0, cylinderOffset, 0);
   rotateX(HALF_PI);
-  float x = mouseX-width/2;
-  float y = mouseY-height/2;
-  Cylinder cylinder = new Cylinder(x,y);
+  float x = clamp(mouseX-width/2, -boxWidth/2, boxWidth/2);
+  
+  float y = clamp(mouseY-height/2,-boxHeight/2,boxHeight/2);
+  
+  if(mouseX-width/2 == x && mouseY-height/2 == y)
+    noCursor();
+  else
+    cursor();
+  
+  Cylinder cylinder = new Cylinder(x, y);
   cylinder.display();
   popMatrix();
 }
@@ -224,7 +230,11 @@ void placeCylinders() {
 }
 
 private static int clamp(int x, int min, int max) {
-  if (x> max)
+  return (int) clamp((float) x, (float) min, (float) max);
+}
+
+private static float clamp(float x, float min, float max) {
+  if (x > max)
     return max;
   else if (x < min)
     return min;
@@ -233,9 +243,10 @@ private static int clamp(int x, int min, int max) {
 
 
 private boolean cylinderCheckEdges() {
- float widthOffset = (width - boxWidth) / 2.0;
- float heightOffset = (height - boxHeight) / 2.0;
- boolean xEdges = (widthOffset + cylinderBaseSize) <= mouseX && mouseX <= (width - widthOffset - cylinderBaseSize);
- boolean yEdges = (heightOffset + cylinderBaseSize) <= mouseY && mouseY <= (height - heightOffset- cylinderBaseSize);
- return  xEdges && yEdges;
+  float widthOffset = (width - boxWidth) / 2.0;
+  float heightOffset = (height - boxHeight) / 2.0;
+  boolean xEdges = (widthOffset + cylinderBaseSize) <= mouseX && mouseX <= (width - widthOffset - cylinderBaseSize);
+  boolean yEdges = (heightOffset + cylinderBaseSize) <= mouseY && mouseY <= (height - heightOffset- cylinderBaseSize);
+  return  xEdges && yEdges;
 }
+
