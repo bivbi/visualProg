@@ -178,8 +178,10 @@ void keyReleased() {
 }
 
 void mouseClicked() {
-  PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
-  cylinders.add(new Cylinder(coords.x, coords.y));
+  if (addingCylinderMode) {
+    PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
+    cylinders.add(new Cylinder(coords.x, coords.y));
+  }
 }
 
 void placeBoxAndSphere() {

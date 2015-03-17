@@ -88,6 +88,7 @@ class Sphere {
       V1N.mult(2);
       PVector v2 = velocity.get();
       v2.sub(V1N);
+      print("new velocity: " + v2); println(" - old velocity: " + velocity);
       velocity.set(v2);
       cylinders.remove(cylinder);
     }
