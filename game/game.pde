@@ -52,6 +52,7 @@ PVector sphereCoordinates  = new PVector(0, 0, 0);
 PVector sphereVelocity     = new PVector(0, 0, 0);
 PVector gravityForce       = new PVector(0, 0, 0);
 boolean addingCylinderMode = false;
+boolean cylinderEdges = false;
 
 ArrayList<PVector> cylinders = new ArrayList<PVector>();
 void setup() {
@@ -223,7 +224,8 @@ void keyReleased() {
 }
 
 void mouseClicked() {
-  if (addingCylinderMode) {
+  cylinderCheckEdges();
+  if (addingCylinderMode && cylinderEdges) {
     cylinders.add(new PVector(mouseX-width/2, cylinderOffset, mouseY-height/2));
   }
 }
@@ -281,3 +283,10 @@ private static int clamp(int x, int min, int max) {
   else return x;
 }
 
+private void cylinderCheckEdges() {
+ float widthOffset = (width - boxWidth) / 2.0;
+ float heightOffset = (height - boxHeight) / 2.0;
+ boolean xEdges = (widthOffset + cylinderBaseSize) <= mouseX && mouseX <= (width - widthOffset - cylinderBaseSize);
+ boolean yEdges = (heightOffset + cylinderBaseSize) <= mouseY && mouseY <= (height - heightOffset- cylinderBaseSize);
+ cylinderEdges = xEdges && yEdges;
+}
