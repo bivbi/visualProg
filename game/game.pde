@@ -104,24 +104,28 @@ void draw() {
 
   //Information in upper left corner
   text("RotationX: "         + tiltAngleX, 5, 10);
-  text("RotationZ: "         + tiltAngleZ, 5, 25);
-  text("Speed: "             + speed, 5, 40);
-  text("sphereCoordinates: " + mover.sphere.coordinates, 5, 55);
-  text("SphereVelocity: "    + mover.sphere.velocity, 5, 70);
+  text("RotationY: "         +     angleY, 5, 25);
+  text("RotationZ: "         + tiltAngleZ, 5, 40);
+  text("Speed: "             + speed, 5, 55);
+  text("sphereCoordinates: " + mover.sphere.coordinates, 5, 70);
+  text("SphereVelocity: "    + mover.sphere.velocity, 5, 85);
 
   lights();
 
   translate(width/2, height/2, 0);        //Set the matrix in the middle of the screen
   placeBoxAndSphere();
-  if (addingCylinderMode)
+  if (addingCylinderMode) {
     cursorCylinder();
-  else
+  } else {
     cursor();
+  }
   placeCylinders();
 }
 
 void mouseDragged() {
   if (!addingCylinderMode) {
+    pushMatrix();
+    rotateY(-angleY);
     if (mouseY > pmouseY) {        //Moved down
       if (tiltAngleX > -maxTilt)
         tiltAngleX -= speedFactor*speed;
@@ -142,6 +146,7 @@ void mouseDragged() {
     if (tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
     if (tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
     if (tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
+    popMatrix();
   }
 }
 
@@ -149,12 +154,18 @@ void mouseDragged() {
 void keyPressed () {
   if (key == CODED) {
     if (keyCode == LEFT && !addingCylinderMode)
-      angleY += speedFactor*speed;
-    if (keyCode == RIGHT && !addingCylinderMode)
       angleY -= speedFactor*speed;
+    if (keyCode == RIGHT && !addingCylinderMode)
+      angleY += speedFactor*speed;
     if (keyCode == SHIFT)
       addingCylinderMode = true;
   }
+  
+  if(angleY >= 360)
+    angleY -= 360;
+  if(angleY < 0)
+    angleY += 360;
+  
 }
 
 //Rotation speed increase or decrease with mouseWheel
