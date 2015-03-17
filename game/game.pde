@@ -18,7 +18,7 @@ final float boxHeight    = 500.0;
 final color boxColor     = #B404A9;
 
 //Sphere parameters
-final float sphereRadius = 48.0;
+final float sphereRadius = 24.0;
 final float sphereOffset = -sphereRadius - boxThickness/2.0;
 final color sphereColor  = #1D10E0;
 
