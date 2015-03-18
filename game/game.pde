@@ -41,7 +41,7 @@ final float minSpeed     = 0.2;
 final float speedScaling = 0.1;
 
 //Constant to have faster changes for the angles
-final float speedFactor  = 3.7;
+final float speedFactor  = 2;
 
 //Variables
 float speed      = 1.0;

@@ -15,7 +15,9 @@ class SpecialRemoval {
   
   void display() {
     image(images[frame/3], xpos, ypos);
-    ++frame;
+    if(!addingCylinderMode) {
+      ++frame;
+    }
     if(frame/3 >= imageCount) {
       specialRemoveBegin = false;
     }
