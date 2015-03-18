@@ -56,16 +56,28 @@ class Sphere {
     if (coordinates.x - sphereRadius < -boxWidth/2) {
       computeCollision(new PVector(-boxWidth/2 + sphereRadius, coordinates.y));
       coordinates.x = -boxWidth/2 + sphereRadius;
+      specialEdgeCollision = true;
+      edgeAudioTimer = 0;
+      edgeAudio.rewind();
     } else if (coordinates.x + sphereRadius > boxWidth/2) {
       computeCollision(new PVector(boxWidth/2 - sphereRadius, coordinates.y));
       coordinates.x = boxWidth/2 - sphereRadius;
+      specialEdgeCollision = true;
+      edgeAudioTimer = 0;
+      edgeAudio.rewind();
     } 
     if (coordinates.y - sphereRadius < -boxHeight/2) {
       computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius));
       coordinates.y = -boxHeight/2 + sphereRadius;
+      specialEdgeCollision = true;
+      edgeAudioTimer = 0;
+      edgeAudio.rewind();
     } else if (coordinates.y + sphereRadius > boxHeight/2) {
       computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius));
       coordinates.y = boxHeight/2 - sphereRadius;
+      specialEdgeCollision = true;
+      edgeAudioTimer = 0;
+      edgeAudio.rewind();
     }
   }
 
@@ -81,8 +93,10 @@ class Sphere {
     if (collisionHappens) {
       computeCollision(cylinder.coordinates);
       if(specialRemoveAllowed) {
+        cylinderAudio.rewind();
+        cylinderAudio.play();
         specialRemoveBegin = true;
-        bonus[0] = new SpecialRemoval(cylinder.coordinates.x, cylinder.coordinates.y, images);    
+        bonus[0] = new SpecialRemoval(cylinder.coordinates.x, cylinder.coordinates.y, images, cylinderAudio);    
       }
       cylinders.remove(cylinder);
     }
