@@ -9,7 +9,7 @@ final float timeFactor   = 1.0 / fps;
 //Gravitation constant
 final float g            = 9.81;
 
-final float elasticity   = 0.9;
+final float elasticity   = 0.97;
 
 //Box parameters
 final float boxThickness = 20.0;

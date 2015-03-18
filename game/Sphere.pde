@@ -56,16 +56,20 @@ class Sphere {
     if (coordinates.x - sphereRadius < -boxWidth/2) {
       computeCollision(new PVector(-boxWidth/2 + sphereRadius, coordinates.y));
       coordinates.x = -boxWidth/2 + sphereRadius;
+      velocity.mult(elasticity);
     } else if (coordinates.x + sphereRadius > boxWidth/2) {
       computeCollision(new PVector(boxWidth/2 - sphereRadius, coordinates.y));
       coordinates.x = boxWidth/2 - sphereRadius;
+      velocity.mult(elasticity);
     } 
     if (coordinates.y - sphereRadius < -boxHeight/2) {
       computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius));
       coordinates.y = -boxHeight/2 + sphereRadius;
+      velocity.mult(elasticity);
     } else if (coordinates.y + sphereRadius > boxHeight/2) {
       computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius));
       coordinates.y = boxHeight/2 - sphereRadius;
+      velocity.mult(elasticity);
     }
   }
 
@@ -95,6 +99,7 @@ class Sphere {
     PVector v2 = velocity.get();
     v2.sub(V1NN);
     velocity.set(v2);
+    velocity.mult(elasticity);
   }
 
   private boolean collisionWithCylinder(PVector cylinderCoordinates) {

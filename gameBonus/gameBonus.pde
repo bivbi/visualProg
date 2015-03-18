@@ -10,7 +10,7 @@ final float timeFactor   = 1.0 / fps;
 //Gravitation constant
 final float g            = 9.81;
 
-final float elasticity   = 0.9;
+final float elasticity   = 0.97;
 
 //Box parameters
 final float boxThickness = 20.0;
@@ -60,10 +60,9 @@ float specialRemoveX;
 float specialRemoveY;
 PImage[]images = new PImage[17];
 Minim minim = new Minim(this);
-AudioPlayer cylinderAudio = minim.loadFile("data/Zelda Main Theme Song.mp3");
-int cylinderSoundLength = cylinderAudio.length()/1000;
-AudioPlayer edgeAudio = minim.loadFile("data/Zelda Main Theme Song.mp3");
-int edgeSoundLength = edgeAudio.length()/1000;
+AudioPlayer cylinderAudio = minim.loadFile("data/xplode.mp3");
+int cylinderSoundLength = cylinderAudio.length();
+AudioPlayer edgeAudio = minim.loadFile("data/bounce.mp3");
 int edgeAudioTimer = 0;
 
 ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
@@ -140,14 +139,14 @@ void draw() {
     cursor();
   }
   placeCylinders();
-  if (specialEdgeCollision) {
+  if (specialRemoveAllowed && specialEdgeCollision) {
     edgeSoundPlay();
   }
 }
 
 void edgeSoundPlay() {
   ++edgeAudioTimer;
-  if(edgeAudioTimer>=edgeSoundLength*fps) {
+  if(edgeAudioTimer>=25) {
     edgeAudio.pause();
   } else {
     edgeAudio.play();
