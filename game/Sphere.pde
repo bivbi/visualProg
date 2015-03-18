@@ -70,10 +70,10 @@ class Sphere {
   }
 
   private void cylindersCollision() {
-    Cylinder cylinder = new Cylinder(0,0);
+    Cylinder cylinder = new Cylinder(0, 0);
     boolean collisionHappens = false;
     for (Cylinder c : cylinders) {
-      if (collisionHappens(c.coordinates.x, c.coordinates.y) && !collisionHappens) {
+      if (collisionWithCylinder(c.coordinates) && !collisionHappens) {
         collisionHappens = true;
         cylinder = c;
       }
@@ -97,11 +97,8 @@ class Sphere {
     velocity.set(v2);
   }
 
-  private boolean collisionHappens(float cx, float cy) {
-    if ((coordinates.x + sphereRadius >= cx - cylinderBaseSize) && (coordinates.x <= cx + cylinderBaseSize))
-      return (coordinates.y + sphereRadius >= cy - cylinderBaseSize) && (coordinates.y <= cy + cylinderBaseSize);
-    else
-      return false;
+  private boolean collisionWithCylinder(PVector cylinderCoordinates) {
+    return coordinates.dist(cylinderCoordinates) <= sphereRadius + cylinderBaseSize;
   }
 }
 
