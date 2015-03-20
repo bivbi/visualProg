@@ -227,7 +227,7 @@ void keyReleased() {
 }
 
 void mouseClicked() {
-  if (addingCylinderMode) {
+  if (addingCylinderMode && cylinderCheckBall(mouseX - width/2, mouseY - height/2)) {
     PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
     cylinders.add(new Cylinder(coords.x, coords.y));
   }
@@ -304,6 +304,11 @@ private static float clamp(float x, float min, float max) {
   else if (x < min)
     return min;
   else return x;
+}
+
+private boolean cylinderCheckBall(float x, float y) {
+  return (mover.sphere.coordinates.dist(new PVector(x,y))) > sphereRadius + cylinderBaseSize;
+  
 }
 
 
