@@ -6,10 +6,12 @@ class Cylinder {
     coordinates.y = y;
   }
   
+  //display a cylinder with or without a color
+  //at the right coordinates
   void display(boolean noFill) {
     pushMatrix();
     translate(coordinates.x, coordinates.y);
-    rotateX(-HALF_PI);
+    rotateX(-HALF_PI); //makes the cylinder on the board in the right angle
     if(noFill) {
       openCylinder.setFill(0);
       topCylinder.setFill(0);

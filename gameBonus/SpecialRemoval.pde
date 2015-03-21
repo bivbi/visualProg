@@ -1,5 +1,6 @@
-class SpecialRemoval {
-  int imageCount = 17;
+class SpecialRemoval {  //Class for the collision with cylinder audio,
+//It used to contain an explosion animation when the ball touches a cylinder,
+//but since it's not suppose to remove the cylinder we removed it
   AudioPlayer cylinderAudio;
   float w = 71/2.0;
   float h = 100/2.0;
