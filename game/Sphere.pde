@@ -53,22 +53,22 @@ class Sphere {
   }
 
   private void edgeCollision() {
-    if (coordinates.x - sphereRadius < -boxWidth/2) {
-      computeCollision(new PVector(-boxWidth/2 + sphereRadius, coordinates.y));
-      coordinates.x = -boxWidth/2 + sphereRadius;
+    if (coordinates.x - sphereRadius/2 < -boxWidth/2) {
+      computeCollision(new PVector(-boxWidth/2 + sphereRadius/2, coordinates.y));
+      coordinates.x = -boxWidth/2 + sphereRadius/2;
       velocity.mult(elasticity);
-    } else if (coordinates.x + sphereRadius > boxWidth/2) {
-      computeCollision(new PVector(boxWidth/2 - sphereRadius, coordinates.y));
-      coordinates.x = boxWidth/2 - sphereRadius;
+    } else if (coordinates.x + sphereRadius/2 > boxWidth/2) {
+      computeCollision(new PVector(boxWidth/2 - sphereRadius/2, coordinates.y));
+      coordinates.x = boxWidth/2 - sphereRadius/2;
       velocity.mult(elasticity);
     } 
-    if (coordinates.y - sphereRadius < -boxHeight/2) {
-      computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius));
-      coordinates.y = -boxHeight/2 + sphereRadius;
+    if (coordinates.y - sphereRadius/2 < -boxHeight/2) {
+      computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius/2));
+      coordinates.y = -boxHeight/2 + sphereRadius/2;
       velocity.mult(elasticity);
-    } else if (coordinates.y + sphereRadius > boxHeight/2) {
-      computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius));
-      coordinates.y = boxHeight/2 - sphereRadius;
+    } else if (coordinates.y + sphereRadius/2 > boxHeight/2) {
+      computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius/2));
+      coordinates.y = boxHeight/2 - sphereRadius/2;
       velocity.mult(elasticity);
     }
   }
@@ -84,7 +84,7 @@ class Sphere {
     }
     if (collisionHappens) {
       computeCollision(cylinder.coordinates);
-      cylinders.remove(cylinder);
+      //cylinders.remove(cylinder);
     }
   }
 
@@ -100,6 +100,7 @@ class Sphere {
     v2.sub(V1NN);
     velocity.set(v2);
     velocity.mult(elasticity);
+    coordinates.sub(n);
   }
 
   private boolean collisionWithCylinder(PVector cylinderCoordinates) {

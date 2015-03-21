@@ -48,6 +48,12 @@ float speed      = 1.0;
 float angleY     = 0.0;
 float tiltAngleX = 0.0;
 float tiltAngleZ = 0.0;
+float prevX      = 0.0;
+float prevZ      = 0.0;
+float begX      = 0.0;
+float begZ      = 0.0;
+boolean saveBeginDrag = true;
+
 Mover mover = new Mover();
 boolean addingCylinderMode = false;
 boolean ignoreYRotation    = true;
@@ -127,31 +133,17 @@ void draw() {
   placeCylinders();
 }
 
+
 void mouseDragged() {
   if (!addingCylinderMode) {
-    pushMatrix();
-    rotateY(-angleY);
-    if (mouseY > pmouseY) {        //Moved down
-      if (tiltAngleX > -maxTilt)
-        tiltAngleX -= speedFactor*speed;
-    } else if (mouseY < pmouseY) { //Moved up
-      if (tiltAngleX < +maxTilt)
-        tiltAngleX += speedFactor*speed;
-    }
-    if (mouseX > pmouseX) {        //Moved right
-      if (tiltAngleZ < maxTilt)
-        tiltAngleZ += speedFactor*speed;
-    } else if (mouseX < pmouseX) { //Moved left
-      if (tiltAngleZ > -maxTilt)
-        tiltAngleZ -= speedFactor*speed;
-    }
-
+    tiltAngleX -= speed*(mouseY-pmouseY)*180/height;
+    tiltAngleZ += speed*(mouseX-pmouseX)*180/width;
+   
     //Check if the Angle are bigger than the maxTilt
     if (tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
     if (tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
     if (tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
     if (tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
-    popMatrix();
   }
 }
 
@@ -197,7 +189,7 @@ void keyReleased() {
 }
 
 void mouseClicked() {
-  if (addingCylinderMode) {
+  if (addingCylinderMode && cylinderCheckBall(mouseX - width/2, mouseY - height/2)) {
     PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
     cylinders.add(new Cylinder(coords.x, coords.y));
   }
@@ -264,6 +256,9 @@ private static float clamp(float x, float min, float max) {
   else return x;
 }
 
+private boolean cylinderCheckBall(float x, float y) {
+  return (mover.sphere.coordinates.dist(new PVector(x, y))) > sphereRadius + cylinderBaseSize;
+}
 
 private PVector cylinderCheckEdges(float x, float y) {
   float x2 = x, y2 = y;

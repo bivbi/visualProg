@@ -2,6 +2,7 @@ class Sphere {
 
   PVector coordinates;
   PVector velocity;
+  color c = color(random(0,255), random(0,255), random(0,255));
 
   Sphere() {
     coordinates = new PVector(0, 0);
@@ -22,7 +23,7 @@ class Sphere {
   void display() {
     pushMatrix();
     translate(coordinates.x, coordinates.y);
-    fill(sphereColor);
+    fill(c);
     sphere(sphereRadius);
     popMatrix();
   }
@@ -49,35 +50,36 @@ class Sphere {
 
   void checkCollisions() {
     edgeCollision();
+    sphereCollision();
     cylindersCollision();
   }
 
   private void edgeCollision() {
-    if (coordinates.x - sphereRadius < -boxWidth/2) {
-      computeCollision(new PVector(-boxWidth/2 + sphereRadius, coordinates.y));
-      coordinates.x = -boxWidth/2 + sphereRadius;
+    if (coordinates.x - sphereRadius/2 < -boxWidth/2) {
+      computeCollision(new PVector(-boxWidth/2 + sphereRadius/2, coordinates.y));
+      coordinates.x = -boxWidth/2 + sphereRadius/2;
       specialEdgeCollision = true;
       velocity.mult(elasticity);
       edgeAudioTimer = 0;
       edgeAudio.rewind();
-    } else if (coordinates.x + sphereRadius > boxWidth/2) {
-      computeCollision(new PVector(boxWidth/2 - sphereRadius, coordinates.y));
-      coordinates.x = boxWidth/2 - sphereRadius;
+    } else if (coordinates.x + sphereRadius/2 > boxWidth/2) {
+      computeCollision(new PVector(boxWidth/2 - sphereRadius/2, coordinates.y));
+      coordinates.x = boxWidth/2 - sphereRadius/2;
       specialEdgeCollision = true;
       velocity.mult(elasticity);
       edgeAudioTimer = 0;
       edgeAudio.rewind();
     } 
-    if (coordinates.y - sphereRadius < -boxHeight/2) {
-      computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius));
-      coordinates.y = -boxHeight/2 + sphereRadius;
+    if (coordinates.y - sphereRadius/2 < -boxHeight/2) {
+      computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius/2));
+      coordinates.y = -boxHeight/2 + sphereRadius/2;
       specialEdgeCollision = true;
       velocity.mult(elasticity);
       edgeAudioTimer = 0;
       edgeAudio.rewind();
-    } else if (coordinates.y + sphereRadius > boxHeight/2) {
-      computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius));
-      coordinates.y = boxHeight/2 - sphereRadius;
+    } else if (coordinates.y + sphereRadius/2 > boxHeight/2) {
+      computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius/2));
+      coordinates.y = boxHeight/2 - sphereRadius/2;
       specialEdgeCollision = true;
       velocity.mult(elasticity);
       edgeAudioTimer = 0;
@@ -85,7 +87,7 @@ class Sphere {
     }
   }
 
-  private void cylindersCollision() {
+  private boolean cylindersCollision() {
     Cylinder cylinder = new Cylinder(0,0);
     boolean collisionHappens = false;
     for (Cylinder c : cylinders) {
@@ -96,14 +98,28 @@ class Sphere {
     }
     if (collisionHappens) {
       computeCollision(cylinder.coordinates);
-      if(specialRemoveAllowed) {
+      if(specialAllowed) {
         cylinderAudio.rewind();
         cylinderAudio.play();
-        specialRemoveBegin = true;
-        bonus[0] = new SpecialRemoval(cylinder.coordinates.x, cylinder.coordinates.y, images, cylinderAudio);    
+        specialBegin = true;
       }
-      cylinders.remove(cylinder);
     }
+    return collisionHappens;
+  }
+  
+  private boolean sphereCollision() {
+    Sphere that = new Sphere();
+    boolean collisionHappens = false;
+    for(Sphere s : mover.spheres) {
+      if(collisionWithSphere(s.coordinates) && !collisionHappens && !(s == this)) {
+        collisionHappens = true;
+        that = s;
+      }
+      if(collisionHappens) {
+        computeCollision(that.coordinates);
+      }
+    }
+    return collisionHappens;
   }
 
   private void computeCollision(PVector coords) {
@@ -118,10 +134,15 @@ class Sphere {
     v2.sub(V1NN);
     velocity.set(v2);
     velocity.mult(elasticity);
+    coordinates.sub(n);
   }
 
   private boolean collisionWithCylinder(PVector cylinderCoordinates) {
     return coordinates.dist(cylinderCoordinates) <= sphereRadius + cylinderBaseSize;
+  }
+  
+  private boolean collisionWithSphere(PVector sphereCoordinates) {
+    return coordinates.dist(sphereCoordinates) <= 2*sphereRadius;
   }
 }
 

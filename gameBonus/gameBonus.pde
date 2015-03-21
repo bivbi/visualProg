@@ -22,6 +22,7 @@ final color boxColor     = #B404A9;
 final float sphereRadius = 24.0;
 final float sphereOffset = -sphereRadius - boxThickness/2.0;
 final color sphereColor  = #1D10E0;
+final int maxSphere      = 10;
 
 //Cylinder parameters
 final float cylinderBaseSize   = 50;
@@ -52,13 +53,11 @@ float tiltAngleZ = 0.0;
 Mover mover = new Mover();
 boolean addingCylinderMode   = false;
 boolean ignoreYRotation      = true;
-boolean specialRemoveAllowed = true;
-boolean specialRemoveBegin   = false;
+boolean specialAllowed       = true;
+boolean specialBegin          = false;
 boolean specialEdgeCollision = false;
-SpecialRemoval[] bonus = new SpecialRemoval[1];
 float specialRemoveX;
 float specialRemoveY;
-PImage[]images = new PImage[17];
 Minim minim = new Minim(this);
 AudioPlayer cylinderAudio = minim.loadFile("data/xplode.mp3");
 int cylinderSoundLength = cylinderAudio.length();
@@ -68,7 +67,6 @@ int edgeAudioTimer = 0;
 ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
 
 void setup() {
-  downloadBonus();
   size(1000, 1000, P3D);
   frameRate(fps);
 
@@ -126,9 +124,7 @@ void draw() {
   }
   text("RotationZ: "         + tiltAngleZ, 5, 40);
   text("Speed: "             + speed, 5, 55);
-  text("sphereCoordinates: " + mover.sphere.coordinates, 5, 70);
-  text("SphereVelocity: "    + mover.sphere.velocity, 5, 85);
-  text("Bonus: " + specialRemoveAllowed + " toggle with 'x'", 5, 100);
+  text("Bonus: " + specialAllowed + " toggle with 'x'", 5, 70);
   lights();
 
   translate(width/2, height/2, 0);        //Set the matrix in the middle of the screen
@@ -139,14 +135,14 @@ void draw() {
     cursor();
   }
   placeCylinders();
-  if (specialRemoveAllowed && specialEdgeCollision) {
+  if (specialAllowed && specialEdgeCollision) {
     edgeSoundPlay();
   }
 }
 
 void edgeSoundPlay() {
   ++edgeAudioTimer;
-  if(edgeAudioTimer>=25) {
+  if (edgeAudioTimer>=25) {
     edgeAudio.pause();
   } else {
     edgeAudio.play();
@@ -156,29 +152,14 @@ void edgeSoundPlay() {
 
 void mouseDragged() {
   if (!addingCylinderMode) {
-    pushMatrix();
-    rotateY(-angleY);
-    if (mouseY > pmouseY) {        //Moved down
-      if (tiltAngleX > -maxTilt)
-        tiltAngleX -= speedFactor*speed;
-    } else if (mouseY < pmouseY) { //Moved up
-      if (tiltAngleX < +maxTilt)
-        tiltAngleX += speedFactor*speed;
-    }
-    if (mouseX > pmouseX) {        //Moved right
-      if (tiltAngleZ < maxTilt)
-        tiltAngleZ += speedFactor*speed;
-    } else if (mouseX < pmouseX) { //Moved left
-      if (tiltAngleZ > -maxTilt)
-        tiltAngleZ -= speedFactor*speed;
-    }
+    tiltAngleX -= speed*(mouseY-pmouseY)*180/height;
+    tiltAngleZ += speed*(mouseX-pmouseX)*180/width;
 
     //Check if the Angle are bigger than the maxTilt
     if (tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
     if (tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
     if (tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
     if (tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
-    popMatrix();
   }
 }
 
@@ -196,7 +177,13 @@ void keyPressed () {
       ignoreYRotation = !ignoreYRotation;
     }
     if (key == 'x') {
-      specialRemoveAllowed = ! specialRemoveAllowed;
+      specialAllowed = ! specialAllowed;
+    }
+    if (key == 's') {
+      mover.addRandomSphere();
+    }
+    if (key == 'd') {
+      mover.removeSphere();
     }
   }
 
@@ -227,9 +214,18 @@ void keyReleased() {
 }
 
 void mouseClicked() {
-  if (addingCylinderMode && cylinderCheckBall(mouseX - width/2, mouseY - height/2)) {
-    PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
-    cylinders.add(new Cylinder(coords.x, coords.y));
+  if (addingCylinderMode) { //  && cylinderCheckBall(mouseX - width/2, mouseY - height/2))
+    if (mover.spheres.isEmpty()) {
+      PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
+      cylinders.add(new Cylinder(coords.x, coords.y));
+    } else {
+      for (Sphere sphere : mover.spheres) {
+        if (cylinderCheckBalls(mouseX - width/2, mouseY - height/2)) {
+          PVector coords = cylinderCheckEdges(mouseX-width/2, mouseY-height/2);
+          cylinders.add(new Cylinder(coords.x, coords.y));
+        }
+      }
+    }
   }
 }
 
@@ -251,16 +247,6 @@ void placeBoxAndSphere() {
   translate(0, sphereOffset, 0);
   rotateX(HALF_PI);
   mover.display();
-  popMatrix();
-  pushMatrix();
-  translate(0, -boxThickness/2 -1, 0);
-  rotateX(HALF_PI);
-  if (specialRemoveAllowed) {
-    if (specialRemoveBegin) {
-      
-      bonus[0].display();
-    }
-  }
   popMatrix();
   popMatrix();
 }
@@ -306,9 +292,14 @@ private static float clamp(float x, float min, float max) {
   else return x;
 }
 
-private boolean cylinderCheckBall(float x, float y) {
-  return (mover.sphere.coordinates.dist(new PVector(x,y))) > sphereRadius + cylinderBaseSize;
-  
+private boolean cylinderCheckBalls(float x, float y) {
+  boolean check = true;
+  for (Sphere s : mover.spheres) {
+    if (s.coordinates.dist(new PVector(x, y)) <= sphereRadius + cylinderBaseSize) {
+      check = false;
+    }
+  } 
+  return check;
 }
 
 
@@ -325,25 +316,5 @@ private PVector cylinderCheckEdges(float x, float y) {
     y2 = boxHeight/2 + sphereRadius -1;
   }
   return new PVector(x2, y2);
-}
-
-void downloadBonus() {
-  images[0]  = loadImage("data/bonus00.png");//"https://www.dropbox.com/s/k21kcoy0l74wx7a/bonus00.png?raw=1");
-  images[1]  = loadImage("data/bonus01.png");//"https://www.dropbox.com/s/mzrmjqo1c6fzo29/bonus01.png?raw=1");
-  images[2]  = loadImage("data/bonus02.png");//"https://www.dropbox.com/s/fdxu5lplukg58nt/bonus02.png?raw=1");
-  images[3]  = loadImage("data/bonus03.png");//"https://www.dropbox.com/s/8hruq4sy54mqmil/bonus03.png?raw=1");
-  images[4]  = loadImage("data/bonus04.png");//"https://www.dropbox.com/s/n1070rlnhynmjpk/bonus04.png?raw=1");
-  images[5]  = loadImage("data/bonus05.png");//"https://www.dropbox.com/s/fvxp6lejn71v9hi/bonus05.png?raw=1");
-  images[6]  = loadImage("data/bonus06.png");//"https://www.dropbox.com/s/pz1jehhinthm0ad/bonus06.png?raw=1");
-  images[7]  = loadImage("data/bonus07.png");//"https://www.dropbox.com/s/rfj803o39uzofkw/bonus07.png?raw=1");
-  images[8]  = loadImage("data/bonus08.png");//"https://www.dropbox.com/s/xyerp3ntff6fv0h/bonus08.png?raw=1");
-  images[9]  = loadImage("data/bonus09.png");//"https://www.dropbox.com/s/seubw9yoz46bizv/bonus09.png?raw=1");
-  images[10] = loadImage("data/bonus10.png");//"https://www.dropbox.com/s/875dv98ed6brgi8/bonus10.png?raw=1");
-  images[11] = loadImage("data/bonus11.png");//"https://www.dropbox.com/s/wa7s8313o1c7y0s/bonus11.png?raw=1");
-  images[12] = loadImage("data/bonus12.png");//"https://www.dropbox.com/s/8l4vq83bv1eygjj/bonus12.png?raw=1");
-  images[13] = loadImage("data/bonus13.png");//"https://www.dropbox.com/s/4qr7brlj800nw9h/bonus13.png?raw=1");
-  images[14] = loadImage("data/bonus14.png");//"https://www.dropbox.com/s/87qlmejxixjsdvp/bonus14.png?raw=1");
-  images[15] = loadImage("data/bonus15.png");//"https://www.dropbox.com/s/fiqrbm5dhtxa9w0/bonus15.png?raw=1");
-  images[16] = loadImage("data/bonus16.png");//"https://www.dropbox.com/s/nhlk94zr6xxuvl1/bonus16.png?raw=1");
 }
 
