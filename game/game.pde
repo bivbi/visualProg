@@ -14,8 +14,8 @@ final float elasticity   = 0.97;
 
 //Box parameters
 final float boxThickness = 20.0;
-final float boxWidth     = 500.0;
-final float boxHeight    = 500.0;
+final float boxWidth     = 400.0;
+final float boxHeight    = 400.0;
 final color boxColor     = #B404A9;
 
 //Sphere parameters
@@ -50,27 +50,41 @@ float tiltAngleX = 0.0;
 float tiltAngleZ = 0.0;
 float prevX      = 0.0;
 float prevZ      = 0.0;
-float begX      = 0.0;
-float begZ      = 0.0;
+float begX       = 0.0;
+float begZ       = 0.0;
 boolean saveBeginDrag = true;
 
 Mover mover = new Mover();
 boolean addingCylinderMode = false;
 boolean ignoreYRotation    = true;
 
+float score = 0;
+float lastScore = 0;
+
 ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
 
+final float ratio             = 1.0/5.0;
+final color bottomPanelColor  = #4EA042;
+final int space               = 20;
+final int blankWidth          = 10;
+final int scoreBoxWidth       = 100;
+BottomPanel bottomPanel;
+
 void setup() {
-  size(1000, 1000, P3D);
+  size(800, 800, P3D);
+  
+  bottomPanel = new BottomPanel(width, (int) (height*ratio), scoreBoxWidth,(int) (height*ratio), bottomPanelColor, space, ratio, blankWidth);
   frameRate(fps);
 
-  createCylinderShape();
+  createCylinderShape(cylinderBaseSize, cylinderHeight);
 
   noStroke();
 }
 
 void draw() {
   background(200);
+  bottomPanel.drawBottomPanel();
+  
   fill(0);
 
   //Information in upper left corner
@@ -88,6 +102,7 @@ void draw() {
   lights();
 
   translate(width/2, height/2, 0);        //Set the matrix in the middle of the screen
+
   placeBoxAndSphere();
 
   if (addingCylinderMode) {  //replace the cursor with a transparent cylinder only if the mouse is in the box
@@ -247,7 +262,7 @@ private PVector cylinderCheckEdges(float x, float y) {
 }
 
 //Create the 3 shapes that model a cylinder
-void createCylinderShape() {
+void createCylinderShape(float cylinderBaseSize, float cylinderHeight) {
   float angle;
   float[] x = new float[cylinderResolution +1];
   float[] y = new float[cylinderResolution +1];

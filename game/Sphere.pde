@@ -51,19 +51,27 @@ class Sphere {
       computeCollision(new PVector(-boxWidth/2 + sphereRadius/2, coordinates.y)); //compute new velocity and coordinates
       coordinates.x = -boxWidth/2 + sphereRadius/2;  //avoid that the sphere leave the box
       velocity.mult(elasticity);  //reduce speed with velocity factor
+      score -= velocity.mag();
+      lastScore = velocity.mag();
     } else if (coordinates.x + sphereRadius/2 > boxWidth/2) { //RIGHT
       computeCollision(new PVector(boxWidth/2 - sphereRadius/2, coordinates.y));
       coordinates.x = boxWidth/2 - sphereRadius/2;
       velocity.mult(elasticity);
+      score -= velocity.mag();
+      lastScore = velocity.mag();
     } 
     if (coordinates.y - sphereRadius/2 < -boxHeight/2) { //TOP
       computeCollision(new PVector(coordinates.x, -boxHeight/2 + sphereRadius/2));
       coordinates.y = -boxHeight/2 + sphereRadius/2;
       velocity.mult(elasticity);
+      score -= velocity.mag();
+      lastScore = velocity.mag();
     } else if (coordinates.y + sphereRadius/2 > boxHeight/2) { //BOTTOM
       computeCollision(new PVector(coordinates.x, boxHeight/2 - sphereRadius/2));
       coordinates.y = boxHeight/2 - sphereRadius/2;
       velocity.mult(elasticity);
+      score -= velocity.mag();
+      lastScore = velocity.mag();
     }
   }
 
@@ -79,6 +87,8 @@ class Sphere {
     }
     if (collisionHappens) {
       computeCollision(cylinder.coordinates); //compute the changes
+      score += 3*velocity.mag();
+      lastScore = 3*velocity.mag();
     }
   }
 
