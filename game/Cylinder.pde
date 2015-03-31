@@ -1,6 +1,6 @@
 class Cylinder {
   PVector coordinates = new PVector(0,0);
-  color c = color(random(0,255), random(0,255), random(0,255));
+  color c = color(0,150,0);//color(random(0,255), random(0,255), random(0,255));
   Cylinder(float x, float y) {
     coordinates.x = x;
     coordinates.y = y;
@@ -11,8 +11,8 @@ class Cylinder {
   void display(boolean noFill) {
     pushMatrix();
     translate(coordinates.x, coordinates.y);
-    rotateX(-HALF_PI); //makes the cylinder on the board in the right angle
-    if(noFill) {
+    rotateX(HALF_PI); //makes the cylinder on the board in the right angle
+    /*if(noFill) {
       openCylinder.setFill(0);
       topCylinder.setFill(0);
       bottomCylinder.setFill(0);
@@ -24,6 +24,10 @@ class Cylinder {
     shape(openCylinder);
     shape(topCylinder);
     shape(bottomCylinder);
+    popMatrix();
+  }
+  */
+    shape(tree);
     popMatrix();
   }
 }

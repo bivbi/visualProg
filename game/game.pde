@@ -26,11 +26,12 @@ final color sphereColor  = #1D10E0;
 //Cylinder parameters
 final float cylinderBaseSize   = 50;
 final float cylinderHeight     = 50;
-final float cylinderOffset     = -cylinderHeight -boxThickness/2.0;
+final float cylinderOffset     =  -boxThickness/2.0;
 final int   cylinderResolution = 40;
 PShape openCylinder            = new PShape();
 PShape topCylinder             = new PShape();
 PShape bottomCylinder          = new PShape();
+PShape tree                    = new PShape();
 
 //Maximum value in degree for the angles along X and Z
 final float maxTilt      = 60.0;
@@ -72,7 +73,9 @@ BottomPanel bottomPanel;
 
 void setup() {
   size(800, 800, P3D);
-  
+  tree = loadShape("tree.obj");
+  tree.scale(20);
+
   bottomPanel = new BottomPanel(width, (int) (height*ratio), scoreBoxWidth,(int) (height*ratio), bottomPanelColor, space, ratio, blankWidth);
   frameRate(fps);
 
