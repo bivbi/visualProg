@@ -59,9 +59,6 @@ Mover mover = new Mover();
 boolean addingCylinderMode = false;
 boolean ignoreYRotation    = true;
 
-float score = 0;
-float lastScore = 0;
-
 ArrayList<Cylinder> cylinders = new ArrayList<Cylinder>();
 
 final float ratio             = 1.0/5.0;
@@ -70,6 +67,9 @@ final int space               = 20;
 final int blankWidth          = 10;
 final int scoreBoxWidth       = 100;
 BottomPanel bottomPanel;
+
+float score = 0;
+float lastScore = 0;
 
 void setup() {
   size(800, 800, P3D);
