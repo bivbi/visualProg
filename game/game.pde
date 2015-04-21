@@ -119,15 +119,19 @@ void draw() {
 
 //Move the box along X and Y
 void mouseDragged() {
-  if (!addingCylinderMode) {
-    tiltAngleX -= speed*(mouseY-pmouseY)*2*maxTilt/height;  //Same thing as a map(0,width,-60,60) but no probleme when
-    tiltAngleZ += speed*(mouseX-pmouseX)*2*maxTilt/width;   //you move the mouse between 2 drags
-
-    //Check if the Angle are bigger than the maxTilt
-    if (tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
-    if (tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
-    if (tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
-    if (tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
+  if(mouseY < height-bottomPanel.h) {
+    if (!addingCylinderMode) {
+      tiltAngleX -= speed*(mouseY-pmouseY)*2*maxTilt/height;  //Same thing as a map(0,width,-60,60) but no probleme when
+      tiltAngleZ += speed*(mouseX-pmouseX)*2*maxTilt/width;   //you move the mouse between 2 drags
+  
+      //Check if the Angle are bigger than the maxTilt
+      if (tiltAngleX > +maxTilt) tiltAngleX = +maxTilt;
+      if (tiltAngleX < -maxTilt) tiltAngleX = -maxTilt;
+      if (tiltAngleZ > +maxTilt) tiltAngleZ = +maxTilt;
+      if (tiltAngleZ < -maxTilt) tiltAngleZ = -maxTilt;
+    }
+  } else {
+    bottomPanel.scrollbar.update();
   }
 }
 

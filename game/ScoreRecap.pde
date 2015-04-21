@@ -5,11 +5,12 @@ class ScoreRecap {
   color c;
   float ratio;
 
-  final int updatingRate = 30;
+  final int updatingRate = 10;
   int updatingCounter    = 0;
   int scoreRecapSize     = 0;
   ArrayList<Double> scoreRecap = new ArrayList<Double>(); 
   int sWidth;
+  int numCol;
   
   ScoreRecap(int scoreRecapWidth, int h, color c, float ratio) {
     this.scoreRecapWidth = scoreRecapWidth;
@@ -18,6 +19,7 @@ class ScoreRecap {
     this.c = c;
     this.ratio = ratio;
     graphic = createGraphics(scoreRecapWidth, h, P2D);
+    numCol = scoreRecapWidth/sWidth;
   }
   
   PGraphics drawScoreRecap() {
@@ -28,10 +30,12 @@ class ScoreRecap {
       scoreRecap.add((double)score);
     }
     graphic.beginDraw();
-      for(int i = 0; i < scoreRecapSize; ++i) {
+    graphic.background(c);
+      int i0 = (int)round(bottomPanel.scrollbar.getPos()*numCol);
+      for(int i = i0; i < scoreRecapSize; ++i) {
         graphic.pushMatrix();
-          graphic.translate(i*sWidth, 0);
-          for(int j = 0; j < (int)java.lang.Math.ceil(scoreRecap.get(i)); ++j) {
+          graphic.translate((i-i0)*sWidth, 0);
+          for(int j = 0; j < (int)(java.lang.Math.ceil(scoreRecap.get(i))/2.5); ++j) {
             graphic.pushMatrix();
               graphic.translate(0,h-(j*sWidth));
               drawSmallBox();
