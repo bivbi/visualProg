@@ -1,6 +1,6 @@
 class Mover {
   //Gravity constant
-  final float g          = 9.81;
+  final float g          = 90;
   
   //Multiplying factor for the velocity changes
   final float timeFactor = 1.0/60.0;
@@ -11,6 +11,7 @@ class Mover {
   PVector location;
   PVector velocity;
   PVector gravity;
+
   
   //Constructor
   Mover() {
