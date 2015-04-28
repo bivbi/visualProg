@@ -50,14 +50,14 @@ public class BoardDetection extends PApplet {
      * Performs a thresholding operation on the given image, with the
      * specified threshold.
      * 
-     * @param img - the image to be thresholded
+     * @param img - the image to be thresholded <b>WARNING :</b> will be modified !
      * @param threshold - between 0 and 255
      * 
      * @return a black and white image, result of the thresholding operation.
      */
     public PImage thresholding(PImage img, int threshold) {
         PImage result = createImage(img.width, img.height, ALPHA);
-        img.filter(GRAY);   // WARNING: TODO: copy of the img !
+        img.filter(GRAY);
         img.loadPixels(); result.loadPixels();
         for(int i = 0; i < img.width * img.height; i++) {
             result.pixels[i] = (brightness(img.pixels[i]) < threshold) ? color(0) : color(255);
@@ -124,9 +124,9 @@ public class BoardDetection extends PApplet {
      * @param weight - the divisor of all summed intensities
      * 
      * @return a new <tt>PImage</tt>, result of the convolution of the image
-     * with the kernel passed as parameters. 
+     * with the kernel passed as parameters. <br>
+     * <b>Warning :</b> The borders of the image may seem darken.
      */
-    // Perfect EXCEPT the edges !!! --> What to do with it ??? cf. http://beej.us/blog/data/convolution-image-processing/
     public PImage convolutionWithWeight(PImage img, int[][] Kernel, int weight) {
         PImage result = createImage(img.width, img.height, RGB);
         
@@ -155,22 +155,21 @@ public class BoardDetection extends PApplet {
     
     /**
      * Performs an edge detection operation (using Sobel operator) on the given
-     * image. WARNING : This image will be modified BLACK AND WHITE / GREYSCALE...
+     * image.
      * 
-     * @param img - the image for which we want to detect edges
+     * @param img - the image for which we want to detect edges <b>WARNING :</b> will be modified !
      *  @param threshold - intensity of the edge detection, between 0 and 1
      *  
-     * @return
+     * @return a new <tt>PImage</tt>, result of the Sobel edge detection algorithm
+     * on the given image.
      */
     public PImage sobel(PImage img, double threshold) {
             
         int[][] hKernel = {{0,1,0},{0,0,0},{0,-1,0}};      
         int[][] vKernel = {{0,0,0},{1,0,-1},{0,0,0}};
         
-        float weight = 1.f;     // A quoi ça sert ?
-        
-        img.filter(GRAY);   // Do SOBEL only on greyscale images !!! In order to brigtness() not te return the value of BLUE channel !!!
-        // WARNING : TODO: Copy of the img ??? In order not to modify it ! √ Definitely.
+        float weight = 1.f;     // Here : doesn't do anything (CAN be changed !)
+        img.filter(GRAY);
         
         PImage result = createImage(img.width, img.height, ALPHA);
         result.loadPixels();
@@ -194,8 +193,8 @@ public class BoardDetection extends PApplet {
                             sum_v += brightness(img.pixels[clampedX + img.width*clampedY]) * vKernel[i][j];
                     }
                 }
-                // TODO: sum_h et sum_v divisées par weight ??? A quoi sert ??? --> Moyenne pondérée, donc divisé par 9 ??? (taille du Kernel)
-                // sum_h /= weight; sum_v /= weight;
+                sum_h /= weight;
+                sum_v /= weight;
                 double sum = Math.sqrt(pow(sum_h, 2) + pow(sum_v, 2));  // euclidian distance
                 buffer[x+img.width*y] = sum;
                 max = (sum > max) ? sum : max;
