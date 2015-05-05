@@ -40,8 +40,8 @@ public class BoardDetection extends PApplet {
 //        PImage imgResult = hueThresholding(img, 105, 130);    // for board3
         PImage imgResult = hueThresholding(img, 93, 137);      // for board4
         PImage imgResult2 = sobel(imgResult, 0.5);
-//        PImage imgHough = hough(imgResult2);
         image(imgResult2, 0, 0);
+        hough(imgResult2);
     }
     
     // ================================================= //
@@ -146,7 +146,7 @@ public class BoardDetection extends PApplet {
                   }
                 }
                 
-                result.pixels[rasterPosition] = color(reds/weight, greens/weight, blues/weight); 
+                result.pixels[rasterPosition] = color(reds/weight, greens/weight, blues/weight);
             }
         }
         result.updatePixels();
@@ -163,10 +163,12 @@ public class BoardDetection extends PApplet {
      * @return a new <tt>PImage</tt>, result of the Sobel edge detection algorithm
      * on the given image.
      */
+    // TODO : New method (MY CONVOLUTION ???)
     public PImage sobel(PImage img, double threshold) {
             
         int[][] hKernel = {{0,1,0},{0,0,0},{0,-1,0}};      
         int[][] vKernel = {{0,0,0},{1,0,-1},{0,0,0}};
+        // + New Kernel (like in conccurency)
         
         float weight = 1.f;     // Here : doesn't do anything (CAN be changed !)
         img.filter(GRAY);
@@ -233,11 +235,18 @@ public class BoardDetection extends PApplet {
         // describing lines going through the point.
         for (int y = 0; y < edgeImg.height; y++) {
             for (int x = 0; x < edgeImg.width; x++) {
-                // Are we on an edge?
+                // Are we on an edge? --> Pixel is white (or NOT black)
                 if (brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
                               
                     // ...determine here all the lines (r, phi) passing through pixel (x,y), convert (r,phi) to coordinates
                     // in the accumulator, and increment accordingly the accumulator.
+                    
+                    for (int phi=0; phi<phiDim; phi++) {
+                        float realPhi = phi * discretizationStepsPhi;
+                        double r = x*Math.cos(realPhi) + y*Math.sin(realPhi);
+                        int rAcc = (int) ((r/discretizationStepsR) + 0.5*(rDim - 1));
+                        accumulator[(phi+1)*(rDim+2) + rAcc] += 1;
+                    }
                     
                 }
             }
@@ -250,6 +259,8 @@ public class BoardDetection extends PApplet {
             houghImg.pixels[i] = color(min(255, accumulator[i]));
         }
         houghImg.updatePixels();
+//        houghImg.resize(400, 400);
+//        image(houghImg, 0, 0);
         
         // Step 3 : Plot the lines
         for (int idx = 0; idx < accumulator.length; idx++) {
