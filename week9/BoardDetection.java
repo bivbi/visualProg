@@ -45,10 +45,12 @@ public class BoardDetection extends PApplet {
 		// PImage imgResult = hueThresholding(img, 108, 139); // for board1
 		// PImage imgResult = hueThresholding(img, 115, 143); // for board3
 		// PImage imgResult = hueThresholding(img, 105, 130); // for board3
-		PImage imgResult = hueThresholding(img, 93, 137); // for board4
-		PImage imgResult2 = sobel(imgResult, 0.5);
-		image(imgResult2, 0, 0);
-		ArrayList<PVector> takenLines = hough(imgResult2, 20);
+		PImage imgResult = hueThresholding(img, 98, 138); // for board4
+		PImage imgResult2 = saturationThresholding(imgResult, 58, 255);
+		PImage imgResult3 = brightnessThresholding(imgResult2, 23, 148);
+		PImage imgResult4 = sobel(imgResult3, 0.5);
+		image(img, 0, 0);
+		ArrayList<PVector> takenLines = hough(imgResult4, 4);
 		ArrayList<PVector> intersections = getIntersections(takenLines);
 	}
 
@@ -119,7 +121,41 @@ public class BoardDetection extends PApplet {
 		for (int i = 0; i < img.width * img.height; ++i) {
 			if (colorMin <= hue(img.pixels[i])
 					&& hue(img.pixels[i]) <= colorMax) {
-				result.pixels[i] = color(0); // White ???
+				result.pixels[i] = img.pixels[i]; // White ???
+			} else {
+				result.pixels[i] = color(255); // Black ??? --> Why inversed
+												// when compute static image ?
+			}
+		}
+		result.updatePixels();
+		return result;
+	}
+
+	public PImage saturationThresholding(PImage img, float saturationMin,
+			float saturationMax) {
+		PImage result = createImage(img.width, img.height, ALPHA);
+		result.loadPixels();
+		for (int i = 0; i < img.width * img.height; ++i) {
+			if (saturationMin <= saturation(img.pixels[i])
+					&& saturation(img.pixels[i]) <= saturationMax) {
+				result.pixels[i] = img.pixels[i]; // White ???
+			} else {
+				result.pixels[i] = color(255); // Black ??? --> Why inversed
+												// when compute static image ?
+			}
+		}
+		result.updatePixels();
+		return result;
+	}
+
+	public PImage brightnessThresholding(PImage img, float brightnessMin,
+			float brightnessMax) {
+		PImage result = createImage(img.width, img.height, ALPHA);
+		result.loadPixels();
+		for (int i = 0; i < img.width * img.height; ++i) {
+			if (brightnessMin <= brightness(img.pixels[i])
+					&& brightness(img.pixels[i]) <= brightnessMax) {
+				result.pixels[i] = img.pixels[i]; // White ???
 			} else {
 				result.pixels[i] = color(255); // Black ??? --> Why inversed
 												// when compute static image ?
@@ -376,7 +412,7 @@ public class BoardDetection extends PApplet {
 		 */
 
 		// Step 3 : Plot the lines
-		for (int idx = 0; idx < nLines; idx++) {
+		for (int idx = 0; idx < min(nLines, bestCandidates.size()); idx++) {
 			println("bestcandidates(i) = " + bestCandidates.get(idx));
 			// first, compute back the (r, phi) polar coordinates:
 			int accPhi = (int) (bestCandidates.get(idx) / (rDim + 2)) - 1;
