@@ -1,0 +1,2 @@
+In the applet, you can use '1', '2', '3' and '4' to switch to image named "boardX.jpg" with X = {1,2,3,4}.
+You can use 'w' to enable or disable the webcam, the methode boundaries will be changed for lego(lighter) rather than duplo (darker).

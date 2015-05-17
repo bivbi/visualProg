@@ -81,8 +81,9 @@ public class ImageProcessing extends PApplet {
         PImage img1 = HSBfiltering(img, minHue, maxHue, minSat, maxSat, minBright, maxBright);
         PImage imgB = convolutionNormalized(img1, GaussianBlurKernel);
         PImage img2 = thresholding(imgB, 0.1f);
-        PImage imgSobel = sobel(img2, sobelThreshold);
-
+        //PImage imgSobel = sobel(img2, sobelThreshold); //thresholding causes problems
+        PImage imgSobel = sobel(imgB, sobelThreshold);
+        
         int[] accumulator = hough(imgSobel);
 
         // Get lines and intersections
