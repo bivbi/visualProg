@@ -30,22 +30,12 @@ public class ImageProcessing extends PApplet {
     static String imgName = "board1.jpg";
 
     // Valid for duplo boards (boardX.jpg images --> NOT FOR WEBCAM)
-    static float minHue = 90;
-    static float maxHue = 138;
-    static float minSat = 60;
-    static float maxSat = 255;
-    static float minBright = 34;
-    static float maxBright = 167;
-
-    
-    // Our lego board is lighter (greener) and brighter than the Duplo board on the images.
-    // Much more like this : (in a bright room)
-//    static float minHue = 80;
-//    static float maxHue = 133;
-//    static float minSat = 65;
-//    static float maxSat = 255;
-//    static float minBright = 40;
-//    static float maxBright = 200;
+    static float minHue;
+    static float maxHue;
+    static float minSat;
+    static float maxSat;
+    static float minBright;
+    static float maxBright;
 
     static float sobelThreshold = 0.3f;
 
