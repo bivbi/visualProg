@@ -1,3 +1,4 @@
+package ch.epfl.cs211;
 
 import processing.core.PApplet;
 

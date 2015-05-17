@@ -1,3 +1,4 @@
+package ch.epfl.cs211;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -29,12 +30,14 @@ public class BoardDetection extends PApplet {
     static String imgName = "board1.jpg";
 
     // Valid for duplo boards (boardX.jpg images --> NOT FOR WEBCAM)
-    static float minHue = 99;
+    static float minHue = 90;
     static float maxHue = 138;
-    static float minSat = 61;
+    static float minSat = 60;
     static float maxSat = 255;
     static float minBright = 34;
     static float maxBright = 167;
+
+    
     // Our lego board is lighter (greener) and brighter than the Duplo board on the images.
     // Much more like this : (in a bright room)
 //    static float minHue = 80;
@@ -64,7 +67,7 @@ public class BoardDetection extends PApplet {
 
     public void setup() {
         size(1200, 300); // change if needed
-        img = loadImage(imgName);
+        img = loadImage(imgName); //press 1-2-3-4 to get the images, w for webcam
 
 //        /* Use for testing */
 //        hueMinBar = new HScrollbar(this, 0, 430, 800, 20);
@@ -73,24 +76,14 @@ public class BoardDetection extends PApplet {
 //        satMaxBar = new HScrollbar(this, 0, 520, 800, 20);
 //        brightMinBar = new HScrollbar(this, 0, 550, 800, 20);
 //        brightMaxBar = new HScrollbar(this, 0, 580, 800, 20);
-
+        
+        getMinMaxBoundaries();
         if (webcam) {
-            String[] cameras = Capture.list();
-            if (cameras.length == 0) {
-                println("There are no cameras available for capture.");
-                exit();
-            } else {
-                println("Available cameras:");
-                for (int i = 0; i < cameras.length; i++) {
-                    println(cameras[i]);
-                }
-                cam = new Capture(this, 640, 480);    // 640, 480 (instead of cameras[0])
-                cam.start();
-            }
+           getCam();
         }
     }
 
-    public void draw() {
+	public void draw() {
 
         if (webcam) {
             if (cam.available()) {
@@ -105,7 +98,7 @@ public class BoardDetection extends PApplet {
 
         PImage img1 = HSBfiltering(img, minHue, maxHue, minSat, maxSat, minBright, maxBright);
         PImage imgB = convolutionNormalized(img1, GaussianBlurKernel);
-        PImage img2 = thresholding(imgB, 10);
+        PImage img2 = thresholding(imgB, 0.1f);
         PImage imgSobel = sobel(img2, sobelThreshold);
 
         int[] accumulator = hough(imgSobel);
@@ -169,22 +162,33 @@ public class BoardDetection extends PApplet {
 
 
     public void keyPressed() {
-
         // Just for testing (display or not the HScrollbars)
         if (key == 'd') {
             displayOn = false;
         } else if (key == 'D') {
             displayOn = true;
-        }
-
-        else if (key == '1') {
-            imgName = "board1.jpg";
-        } else if (key == '2') {
-            imgName = "board2.jpg";
-        } else if (key == '3') {
-            imgName = "board3.jpg";
-        } else if (key == '4') {
-            imgName = "board4.jpg";
+        } else if(!webcam) {
+        	if(key == 'w') {
+        		webcam = true;
+        		getMinMaxBoundaries();
+        		if(cam == null) {
+        			getCam();
+        		} else {
+        			cam.start();
+        		}
+        	} else if (key == '1') {
+	            imgName = "board1.jpg";
+	        } else if (key == '2') {
+	            imgName = "board2.jpg";
+	        } else if (key == '3') {
+	            imgName = "board3.jpg";
+	        } else if (key == '4') {
+	            imgName = "board4.jpg";
+	        }
+        } else if(webcam && key == 'w') {
+        	webcam = false;
+        	getMinMaxBoundaries();
+        	cam.stop();
         }
 
         img = loadImage(imgName);
@@ -197,9 +201,52 @@ public class BoardDetection extends PApplet {
     /************** UTILITY METHODS : *****************/
     /**************************************************/
 
-
+    /**
+     * Called when we toggle on or off the cam to update the boundaries
+     * because the buplo is darker than the lego.
+     * Called when 'w' is pressed
+     */
+    private void getMinMaxBoundaries() {
+    	// Valid for duplo boards (boardX.jpg images --> NOT FOR WEBCAM)
+        if(!webcam) {
+	    	minHue = 90;
+	        maxHue = 138;
+	        minSat = 60;
+	        maxSat = 255;
+	        minBright = 34;
+	        maxBright = 167;
+        } else {
+	        // Our lego board is lighter (greener) and brighter than the Duplo board on the images.
+	        // Much more like this : (in a bright room)
+	        minHue = 80;
+	        maxHue = 133;
+	        minSat = 65;
+	        maxSat = 255;
+	        minBright = 40;
+	        maxBright = 200;
+        }
+	}
 
     /**
+     * Toggle on or off the cam.
+     * Called when 'w' is pressed
+     */
+    private void getCam() {
+    	String[] cameras = Capture.list();
+        if (cameras.length == 0) {
+        	println("There are no cameras available for capture.");
+            exit();
+        } else {
+            println("Available cameras:");
+            for (int i = 0; i < cameras.length; i++) {
+                println(cameras[i]);
+            }
+            cam = new Capture(this, 640, 480);    // 640, 480 (instead of cameras[0])
+            cam.start();
+        }
+	}
+
+	/**
      * Performs a thresholding operation on the given image, with the
      * specified threshold.
      *
@@ -208,12 +255,12 @@ public class BoardDetection extends PApplet {
      *
      * @return a black and white image, result of the thresholding operation.
      */
-    public PImage thresholding(PImage img, int threshold) {
+    public PImage thresholding(PImage img, float threshold) {
         PImage result = createImage(img.width, img.height, ALPHA);
         img.filter(GRAY);
         img.loadPixels(); result.loadPixels();
         for(int i = 0; i < img.width * img.height; i++) {
-            result.pixels[i] = (brightness(img.pixels[i]) < threshold) ? color(0) : color(255);
+            result.pixels[i] = (brightness(img.pixels[i]) < threshold) ? color(0, 0, 0) : color(255, 255, 255);
         }
         result.updatePixels();
         return result;
@@ -385,9 +432,9 @@ public class BoardDetection extends PApplet {
 
     /**
      *
-     * @param edgeImg
+     * @param edgeImg - original <tt>PImage</tt> we want to detect the edges on.
      *
-     * @return
+     * @return a new int[], accumulator of the edgeImg.
      */
     public int[] hough(PImage edgeImg) {
         float discretizationStepsPhi = 0.06f;
@@ -422,11 +469,11 @@ public class BoardDetection extends PApplet {
 
     /**
      *
-     * @param edgeImg
-     * @param accumulator
-     * @param nLines
+     * @param edgeImg - original <tt>PImage</tt> we want to detect the edges on.
+     * @param accumulator - the int[] resulting of <tt>hough</tt>
+     * @param nLines - number of lines we want to take
      *
-     * @return
+     * @return a new <tt>ArrayList</tt> of PVector with nLines tuples r, phi.
      */
     ArrayList<PVector> getCoordinates(PImage edgeImg, int[] accumulator, int nLines) {
         ArrayList<PVector> result = new ArrayList<>();
@@ -492,10 +539,10 @@ public class BoardDetection extends PApplet {
 
     /**
      *
-     * @param edgeImg
-     * @param accumulator
+     * @param edgeImg - original <tt>PImage</tt> we want to detect the edges on.
+     * @param accumulator - the int[] resulting of <tt>hough</tt>
      *
-     * @return
+     * @return a new <tt>PImage</tt> with the accumulator resized to the edgeImg size.
      */
     PImage drawAccumulator(PImage edgeImg, int[] accumulator) {
         float discretizationStepsPhi = 0.06f;
@@ -515,67 +562,10 @@ public class BoardDetection extends PApplet {
 
     /**
      *
-     * @param takenLine
-     * @param baseImg
+     * @param lines - <tt>ArrayList</tt> of PVector of tuple r, phi, result of getCoordinates.
      *
-     * @return
-     */
-    private PGraphics drawLines(ArrayList<PVector> takenLine, PImage baseImg) {
-        PGraphics lines = createGraphics(baseImg.width, baseImg.height);
-        lines.beginDraw();
-        lines.background(baseImg);
-        lines.stroke(204, 102, 0);
-        for (int idx = 0; idx < takenLine.size(); idx++) {
-            // Cartesian equation of a line: y = ax + b
-            // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
-            // => y = 0 : x = r / cos(phi)
-            // => x = 0 : y = r / sin(phi)
-            // compute the intersection of this line with the 4 borders of
-            // the image
-            float r = takenLine.get(idx).x;
-            float phi = takenLine.get(idx).y;
-            int x0 = 0;
-            int y0 = (int) (r / sin(phi));
-            int x1 = (int) (r / cos(phi));
-            int y1 = 0;
-            int x2 = width;
-            int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
-            int y3 = width;
-            int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
-            // y0 = min(y0, height);
-            // x1 = min(x1, width);
-            // y2 = min(y0, height);
-            // x3 = min (x3, width);
-            // Finally, plot the lines
-            if (y0 > 0) {
-                if (x1 > 0) {
-                    lines.line(x0, y0, x1, y1);
-                } else if (y2 > 0) {
-                    lines.line(x0, y0, x2, y2);
-                } else {
-                    lines.line(x0, y0, x3, y3);
-                }
-            } else {
-                if (x1 > 0) {
-                    if (y2 > 0) {
-                        lines.line(x1, y1, x2, y2);
-                    } else {
-                        lines.line(x1, y1, x3, y3);
-                    }
-                } else {
-                    lines.line(x2, y2, x3, y3);
-                }
-            }
-        }
-        lines.endDraw();
-        return lines;
-    }
-
-    /**
-     *
-     * @param lines
-     *
-     * @return
+     * @return a new <tt>ArrayList</tt> containt the carthesian coordinates
+     * of the intersection of the different lines in <tt>lines</tt>
      */
     private ArrayList<PVector> getIntersections(List<PVector> lines) {
         ArrayList<PVector> intersections = new ArrayList<>();
@@ -595,11 +585,65 @@ public class BoardDetection extends PApplet {
     }
 
     /**
+    *
+    * @param takenLine - <tt>ArrayList</tt> of PVector of (r, phi), result of  getCoordinates.
+    * @param baseImg - <tt>PImage</tt> to display under the lines.
+    *
+    * @return a new <tt>PImage</tt> with the corresponding lines on it.
+    */
+   private PGraphics drawLines(ArrayList<PVector> takenLine, PImage baseImg) {
+       PGraphics lines = createGraphics(baseImg.width, baseImg.height);
+       lines.beginDraw();
+       lines.background(baseImg);
+       lines.stroke(204, 102, 0);
+       for (int idx = 0; idx < takenLine.size(); idx++) {
+           // Cartesian equation of a line: y = ax + b
+           // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
+           // => y = 0 : x = r / cos(phi)
+           // => x = 0 : y = r / sin(phi)
+           // compute the intersection of this line with the 4 borders of
+           // the image
+           float r = takenLine.get(idx).x;
+           float phi = takenLine.get(idx).y;
+           int x0 = 0;
+           int y0 = (int) (r / sin(phi));
+           int x1 = (int) (r / cos(phi));
+           int y1 = 0;
+           int x2 = width;
+           int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+           int y3 = width;
+           int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+           // Finally, plot the lines
+           if (y0 > 0) {
+               if (x1 > 0) {
+                   lines.line(x0, y0, x1, y1);
+               } else if (y2 > 0) {
+                   lines.line(x0, y0, x2, y2);
+               } else {
+                   lines.line(x0, y0, x3, y3);
+               }
+           } else {
+               if (x1 > 0) {
+                   if (y2 > 0) {
+                       lines.line(x1, y1, x2, y2);
+                   } else {
+                       lines.line(x1, y1, x3, y3);
+                   }
+               } else {
+                   lines.line(x2, y2, x3, y3);
+               }
+           }
+       }
+       lines.endDraw();
+       return lines;
+   }
+    
+    /**
      *
-     * @param interCoords
-     * @param baseImage
+     * @param interCoords - <tt>ArrayList</tt> of PVector (x,y(,z=0)), result of getIntersection.
+     * @param baseImage - <tt>PImage</tt> to display under the dots.
      *
-     * @return
+     * @return a new <tt>PImage</tt> with dots corresponding on it.
      */
     PGraphics drawIntersection(ArrayList<PVector> interCoords, PImage baseImage) {
         PGraphics intersection = createGraphics(baseImage.width, baseImage.height);
