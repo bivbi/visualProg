@@ -3,17 +3,17 @@ package ch.epfl.cs211;
 import java.util.Comparator;
 
 class HoughComparator implements Comparator<Integer> {
-	int[] accumulator;
+    int[] accumulator;
 
-	public HoughComparator(int[] accumulator) {
-		this.accumulator = accumulator;
-	}
+    public HoughComparator(int[] accumulator) {
+        this.accumulator = accumulator;
+    }
 
-	@Override
-	public int compare(Integer l1, Integer l2) {
-		if (accumulator[l1] > accumulator[l2]
-				|| (accumulator[l1] == accumulator[l2] && l1 < l2))
-			return -1;
-		return 1;
-	}
+    @Override
+    public int compare(Integer l1, Integer l2) {
+        if (accumulator[l1] > accumulator[l2]
+                || (accumulator[l1] == accumulator[l2] && l1 < l2))
+            return -1;
+        return 1;
+    }
 }
