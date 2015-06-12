@@ -1,0 +1,63 @@
+/******************************************
+*					  *
+*  Instructions week9 - Visual Computing  *
+*					  *
+******************************************/
+
+Hey Yann et Virgulus, dans cette archive, je vous fournis
+2 classes, que vous pouvez importer dans un de vos projets
+Java existants !
+Elle sont pas entièrement stand-alone, il vous faudra
+importer la librairie "core" de Processing + un autre .jar
+pour la gestion de la Wecam, que vous trouverez ici :
+
+$PROCESSING_ROOT/modes/java/libraries/video/library
+
+
+Si vous voulez vous amuser dès le début, lancer la classe
+"LiveBoardDetection" --> Ça marche assez bien pour des objets
+verts comme le plateau lego qu'on nous donne.
+J'ai pas pu tester avec le plateau lui-même, mais on affinera
+les réglages.
+> En tout cas, avec ma carte de Tramway, ça marche parfaitement.
+ATTENTION : en basse luminosité, ça marche pas du tout, ça donne
+des résultats complètement chelou, donc entrainez-vous pas la nuit !
+
+Vous pouvez vous amusez avec les différentes fonction de convolution,
+et le sobel, MAIS :
+
+J'ai du recopier EXACTEMENT le code de BoardDetection dans le
+fichier LiveBoardDetection. J'aurais préféré faire des références
+statiques aux méthodes de BoardDetection, qu'on appellerait DEPUIS
+LiveBoardDetection, mais c'est impossible ! (essayez de les mettre
+en static, vous verrez)
+Du coup, je vous demande amicalement / oblige, si vous faites un 
+changement, de le faire OBLIGATOIREMENT (amicalement) dans la 
+classe "BoardDetection", pas dans la Webcam.
+
+Vous pouvez continuer la méthode "hough" que j'ai simplement
+copié-collée du PDF, si vous vous en sentez capable.
+Toujours, dans le fichier BoardDetection svp !!!
+
+/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*
+
+P.S : Il me reste 2, 3 trucs à voir avec les assistants,
+notamment :
+
+• la COPIE de l'image passée en paramètre (clone ?)
+pour éviter de la modifier, e.g quand on fait img.filter(GRAY)
+--> Embêtant
+
+• la gestion des BORDS de l'image, lorsqu'on convolute :
+--> Assumer qu'ils sont noirs ?
+--> Assumer qu'ils sont blancs ?
+--> Masquer l'image resultante de 1 ou 2 pixels sur les côtés
+--> Prendre la même valeur que les pixels les plus proches ?
+
+/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*
+
+Bref, beau boulot pour Blender les gars,
+J'espère qu'on va avoir une super note !
+
+Bisous,
+Alexandre.
