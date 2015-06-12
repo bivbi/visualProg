@@ -1,4 +1,6 @@
-import processing.core.*; 
+package ch.epfl.cs211;
+
+import processing.core.*;
 import processing.data.*; 
 import processing.event.*; 
 import processing.opengl.*; 
@@ -597,11 +599,12 @@ class ScoreRecap {
   int h;
   int c;
   float ratio;
+  float factor = 1f;
 
   final int updatingRate = 10;
   int updatingCounter    = 0;
   int scoreRecapSize     = 0;
-  ArrayList<Double> scoreRecap = new ArrayList<Double>(); 
+  ArrayList<Float> scoreRecap = new ArrayList<Float>();
   int sWidth;
   int numCol;
   
@@ -616,24 +619,24 @@ class ScoreRecap {
   }
   
   public PGraphics drawScoreRecap() {
-    updatingCounter += 1;
-    if(updatingCounter > updatingRate) {
-      ++scoreRecapSize;
-      updatingCounter -= updatingRate;
-      scoreRecap.add((double)score);
+    if(!addingCylinderMode) {
+      updatingCounter += 1;
+      if (updatingCounter > updatingRate) {
+        ++scoreRecapSize;
+        updatingCounter -= updatingRate;
+        scoreRecap.add(score);
+      }
     }
     graphic.beginDraw();
     graphic.background(c);
-      int i0 = (int)round(bottomPanel.scrollbar.getPos()*numCol);
+      int i0 = round(bottomPanel.scrollbar.getPos()*numCol);
       for(int i = i0; i < scoreRecapSize; ++i) {
+        if(scoreRecap.get(i)/factor > h) {
+          factor *= 1.3;
+        }
         graphic.pushMatrix();
-          graphic.translate((i-i0)*sWidth, 0);
-          for(int j = 0; j < (int)(java.lang.Math.ceil(scoreRecap.get(i))/2.5f); ++j) {
-            graphic.pushMatrix();
-              graphic.translate(0,h-(j*sWidth));
-              drawSmallBox();
-            graphic.popMatrix();
-          }
+        graphic.translate((i-i0)*sWidth, 0);
+        graphic.rect(0, h, sWidth, -scoreRecap.get(i)/factor);
         graphic.popMatrix();
       }
     graphic.endDraw();
