@@ -226,11 +226,11 @@ public class ImageProcessing extends PApplet {
             // board on the images.
             // Much more like this : (in a bright room)
             minHue = 90;
-            maxHue = 140;
-            minSat = 70;
+            maxHue = 127;
+            minSat = 100;
             maxSat = 255;
-            minBright = 30;
-            maxBright = 180;
+            minBright = 50;
+            maxBright = 220;
         }
     }
 
