@@ -21,7 +21,7 @@ import processing.video.Capture;
 public class ImageProcessing extends PApplet {
 
     static public void main(String args[]) {
-        PApplet.main(new String[]{"BoardDetection"});
+        PApplet.main(new String[]{"ImageProcessing"});
     }
 
     /*******************
@@ -51,7 +51,7 @@ public class ImageProcessing extends PApplet {
 
     /***********************************************/
 
-    public void setup() {
+   /*public void setup() {
         size(1200, 300);
         img = loadImage(imgName); // press 1-2-3-4 to get the images, w for
         // webcam
@@ -101,12 +101,10 @@ public class ImageProcessing extends PApplet {
         render.endDraw();
         render.resize(1200, 300);
         image(render, 0, 0);
-    }
-
-    public PVector getRotation(PImage img) {
-        img.loadPixels();
-        this.init();
-        PImage imgResult = doTransformations(img);
+    }*/
+    public PVector getRotation(PApplet app, PImage img) {
+        init();
+        PImage imgResult = doTransformations(app, img);
 
         int[] accumulator = hough(imgResult);
 
@@ -115,7 +113,7 @@ public class ImageProcessing extends PApplet {
 
         ArrayList<PVector> corners = computeCycle(imgResult, linesCoordinates);
 
-        if(corners.size() < 4) return null;
+        if (corners.size() < 4) return null;
         TwoDThreeD conv = new TwoDThreeD(imgResult.width, imgResult.height);
         return conv.get3DRotations(corners);
     }
@@ -204,9 +202,9 @@ public class ImageProcessing extends PApplet {
     /************** UTILITY METHODS : *****************/
     /**************************************************/
 
-    private PImage doTransformations(PImage image) {
-        // return sobel((blur(HSBfiltering(img))), sobelThreshold);
-        return sobel(intensityThresholding(blur(HSBfiltering(img))),
+    public PImage doTransformations(PApplet app, PImage image) {
+        this.init();
+        return sobel(app, intensityThresholding(app, blur(app, HSBfiltering(app, image))),
                 sobelThreshold);
     }
 
@@ -214,7 +212,7 @@ public class ImageProcessing extends PApplet {
      * Called when we toggle on or off the cam to update the boundaries because
      * the buplo is darker than the lego. Called when 'w' is pressed
      */
-    private void getMinMaxBoundaries() {
+    public void getMinMaxBoundaries() {
         // Valid for duplo boards (boardX.jpg images --> NOT FOR WEBCAM)
         if (!webcam) {
             minHue = 90;
@@ -227,12 +225,12 @@ public class ImageProcessing extends PApplet {
             // Our lego board is lighter (greener) and brighter than the Duplo
             // board on the images.
             // Much more like this : (in a bright room)
-            minHue = 80;
-            maxHue = 133;
-            minSat = 65;
+            minHue = 90;
+            maxHue = 140;
+            minSat = 70;
             maxSat = 255;
-            minBright = 40;
-            maxBright = 200;
+            minBright = 30;
+            maxBright = 180;
         }
     }
 
@@ -273,22 +271,23 @@ public class ImageProcessing extends PApplet {
         img.loadPixels();
         result.loadPixels();
         for (int i = 0; i < img.width * img.height; i++) {
-            result.pixels[i] = (brightness(img.pixels[i]) < threshold) ? color(
+            result.pixels[i] = (this.brightness(img.pixels[i]) < threshold) ? color(
                     0, 0, 0) : color(255, 255, 255);
         }
         result.updatePixels();
         return result;
     }
 
-    private PImage intensityThresholding(PImage image) {
+    public PImage intensityThresholding(PApplet app, PImage image) {
+        this.init();
         int threshold = 128;
 
-        PImage result = createImage(img.width, img.height, HSB);
+        PImage result = createImage(image.width, image.height, HSB);
         int[] imagePixels = image.pixels;
         int[] resultPixels = result.pixels;
 
         for (int i = 0; i < imagePixels.length; ++i) {
-            if (brightness(imagePixels[i]) >= threshold) {
+            if (app.brightness(imagePixels[i]) >= threshold) {
                 resultPixels[i] = color(255);
             } else {
                 resultPixels[i] = color(0);
@@ -298,22 +297,22 @@ public class ImageProcessing extends PApplet {
         return result;
     }
 
-    public PImage HSBfiltering(PImage img) {
-        PImage result = createImage(img.width, img.height, HSB); // or RGB, same
-        // result
+    public PImage HSBfiltering(PApplet app, PImage img) {
+        init();
+        PImage result = createImage(img.width, img.height, RGB);
         img.loadPixels();
-        result.loadPixels();
+        // result
         for (int i = 0; i < img.width * img.height; i++) {
-            float currentBrightness = brightness(img.pixels[i]);
-            float currentSat = saturation(img.pixels[i]);
-            float currentHue = hue(img.pixels[i]);
+            float currentBright = app.brightness(img.pixels[i]);
+            float currentSat = app.saturation(img.pixels[i]);
+            float currentHue = app.hue(img.pixels[i]);
             // Threshold
-            if (currentBrightness < minBright || currentBrightness > maxBright
-                    || currentSat < minSat || currentSat > maxSat
-                    || currentHue < minHue || currentHue > maxHue) {
-                result.pixels[i] = color(0);
-            } else {
+            if (minHue <= currentHue && currentHue <= maxHue &&
+                    minSat <= currentSat && currentSat <= maxSat &&
+                    minBright <= currentBright && currentBright <= maxBright) {
                 result.pixels[i] = color(255);
+            } else {
+                result.pixels[i] = color(0);
             }
         }
         result.updatePixels();
@@ -333,8 +332,8 @@ public class ImageProcessing extends PApplet {
         return convolutionWithWeight(img, Kernel, normalizingWeight);
     }
 
-    private PImage blur(PImage image) {
-        return convolutionNormalized(image, GaussianBlurKernel);
+    public PImage blur(PApplet app, PImage image) {
+        return convolutionNormalized(image, BoxBlurKernel);
     }
 
     private int sumWeight(int[][] Kernel) {
@@ -358,6 +357,7 @@ public class ImageProcessing extends PApplet {
      * <b>Warning :</b> The borders of the image may seem darken.
      */
     public PImage convolutionWithWeight(PImage img, int[][] Kernel, int weight) {
+        this.init();
         PImage result = createImage(img.width, img.height, RGB);
 
         for (int x = Kernel.length / 2; x < img.width - Kernel.length / 2; x++) {
@@ -402,12 +402,12 @@ public class ImageProcessing extends PApplet {
      * @return a new ALPHA <tt>PImage</tt>, result of the Sobel edge detection
      * algorithm on the given image.
      */
-    public PImage sobel(PImage img, double threshold) {
+    public PImage sobel(PApplet app, PImage img, double threshold) {
+        init();
+        PImage gray = new PImage(img.width, img.height);
+        gray.pixels = img.pixels.clone();
+        gray.filter(GRAY); // If the image passed as parameter is not B&W,
 
-        if (img.format != ALPHA) { // ALPHA = 4, GRAY = 12
-            img.filter(GRAY); // If the image passed as parameter is not B&W,
-            // turn it into B&W
-        }
 
         // Assignment Kernels :
         int[][] hKernel = {{0, 1, 0}, {0, 0, 0}, {0, -1, 0}};
@@ -417,44 +417,44 @@ public class ImageProcessing extends PApplet {
         // int[][] hKernel = {{-1,-2,-1},{0,0,0},{1,2,1}};
         // int[][] vKernel = {{-1,0,1},{-2,0,2},{-1,0,1}};
 
-        PImage result = createImage(img.width, img.height, ALPHA);
+        PImage result = createImage(gray.width, gray.height, ALPHA);
         result.loadPixels();
-        for (int i = 0; i < img.width * img.height; i++) { // Clear the image
-            result.pixels[i] = color(0);
+        for (int i = 0; i < gray.width * gray.height; i++) { // Clear the image
+            result.pixels[i] = app.color(0);
         }
 
         double max = 0;
-        double[] buffer = new double[img.width * img.height];
+        double[] buffer = new double[gray.width * gray.height];
 
         // Does the double convolution :
         int N = hKernel.length;
 
-        for (int x = N / 2; x < img.width - N / 2; x++) {
-            for (int y = N / 2; y < img.height - N / 2; y++) {
+        for (int x = N / 2; x < gray.width - N / 2; x++) {
+            for (int y = N / 2; y < gray.height - N / 2; y++) {
                 float sum_h = 0, sum_v = 0;
                 for (int i = -N / 2; i <= N / 2; i++) {
                     for (int j = -N / 2; j <= N / 2; j++) {
                         sum_h += hKernel[i + (N / 2)][j + (N / 2)]
-                                * brightness(img.pixels[x + y * img.width + i
-                                + j * img.width]);
+                                * app.brightness(gray.pixels[x + y * gray.width + i
+                                + j * gray.width]);
                         sum_v += vKernel[i + (N / 2)][j + (N / 2)]
-                                * brightness(img.pixels[x + y * img.width + i
-                                + j * img.width]);
+                                * app.brightness(gray.pixels[x + y * gray.width + i
+                                + j * gray.width]);
                     }
                 }
-                buffer[x + y * img.width] = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
+                buffer[x + y * gray.width] = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
                 if (sqrt(pow(sum_h, 2) + pow(sum_v, 2)) > max) {
                     max = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
                 }
             }
         }
 
-        for (int y = 2; y < img.height - 2; y++) { // Skip top and bottom edges
-            for (int x = 2; x < img.width - 2; x++) { // Skip left and right
-                if (buffer[y * img.width + x] > (int) (max * threshold)) {
-                    result.pixels[y * img.width + x] = color(255);
+        for (int y = 2; y < gray.height - 2; y++) { // Skip top and bottom edges
+            for (int x = 2; x < gray.width - 2; x++) { // Skip left and right
+                if (buffer[y * gray.width + x] > (int) (max * threshold)) {
+                    result.pixels[y * gray.width + x] = color(255);
                 } else {
-                    result.pixels[y * img.width + x] = color(0);
+                    result.pixels[y * gray.width + x] = color(0);
                 }
             }
         }
@@ -481,7 +481,7 @@ public class ImageProcessing extends PApplet {
         for (int y = 0; y < edgeImg.height; y++) {
             for (int x = 0; x < edgeImg.width; x++) {
                 // Are we on an edge? --> Pixel is NOT black (white)
-                if (brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
+                if (this.brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
                     // determine and store all possible (r, phi) pairs
                     // describing lines going through the point.
                     // convert (r, phi) to coordinates in the accumulator

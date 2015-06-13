@@ -3,7 +3,9 @@ package ch.epfl.cs211;
 import processing.core.*;
 import processing.event.*;
 import processing.video.Capture;
+
 import static java.lang.Math.toRadians;
+
 import java.util.ArrayList;
 
 public class game extends PApplet {
@@ -72,44 +74,21 @@ public class game extends PApplet {
     final int scoreBoxWidth = 100;
     BottomPanel bottomPanel;
 
-    ImageProcessing imgProc = new ImageProcessing();
-
     float score = 0;
     float lastScore = 0;
 
-    boolean camInit = false;
-    Capture cam;
-
-    public void getCam() {
-        if(!camInit) {
-            camInit = true;
-            String[] cameras = Capture.list();
-            if (cameras.length == 0) {
-                println("There are no cameras available for capture.");
-                exit();
-            } else {
-                println("Available cameras:");
-                for (int i = 0; i < cameras.length; i++) {
-                    println(cameras[i]);
-                }
-
-                cam = new Capture(this, 640, 480); // 640, 480 (instead of
-                // cameras[0])
-                cam.start();
-            }
-        }
+    public void setAngles(PVector rot) {
+        tiltAngleX = degrees(rot.x);
+        angleY = degrees(rot.y);
+        tiltAngleZ = degrees(rot.z);
     }
 
     public void setup() {
-
-        if (ImageProcessing.webcam) getCam();
-
-        size(800, 800, P3D);
+        size(1280, 800, P3D);
         tree = loadShape("tree.obj");
         tree.scale(20);
 
         bottomPanel = new BottomPanel(width, (int) (height * ratio), scoreBoxWidth, (int) (height * ratio), bottomPanelColor, space, ratio, blankWidth);
-        frameRate(fps);
 
         createCylinderShape(cylinderBaseSize, cylinderHeight);
 
@@ -117,6 +96,7 @@ public class game extends PApplet {
     }
 
     public void draw() {
+        pushMatrix();
         background(200);
         bottomPanel.drawBottomPanel();
 
@@ -133,19 +113,7 @@ public class game extends PApplet {
         text("Speed: " + speed, 5, 55);
         text("sphereCoordinates: " + mover.sphere.coordinates, 5, 70);
         text("SphereVelocity: " + mover.sphere.velocity, 5, 85);
-        if (ImageProcessing.webcam) {
-            if (cam.available()) {
-                cam.read();
-            }
-            PImage image = cam.get();
-            PVector rot = imgProc.getRotation(image);
-            image.resize(160, 120);
-            image(image, width - 160, 0);
-            if (rot != null) {
-                println(rot.x + ", " + rot.y + ", " + rot.z);
-                text(rot.x + ", " + rot.y + ", " + rot.z, 5, 100);
-            }
-        }
+
 
         lights();
         translate(width / 2, height / 2, 0);        //Set the matrix in the middle of the screen
@@ -159,7 +127,7 @@ public class game extends PApplet {
         }
 
         placeCylinders();
-
+        popMatrix();
     }
 
 
@@ -193,12 +161,6 @@ public class game extends PApplet {
         } else {
             if (key == 'y') {
                 ignoreYRotation = !ignoreYRotation;
-            }
-            if (key == 'w') {
-                ImageProcessing.webcam = !ImageProcessing.webcam;
-                if (cam == null) {
-                    getCam();
-                }
             }
         }
 
